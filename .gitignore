@@ -50,3 +50,6 @@
 # Ignore all local history of files
 .history
 .ionide
+
+# Ignore `bin` dir
+bin/
