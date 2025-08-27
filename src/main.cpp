@@ -3,8 +3,9 @@
 #include <cctype>
 using namespace std;
 
+int solicitarOpcion();
 struct usuario crearUsuario();
-bool esIdValido(string id);
+bool esEntero(string id);
 
 struct usuario {
     int id;
@@ -16,13 +17,35 @@ int main(int argn, char* argv[]) {
     cout << "Sistema de usuarios" << endl;
     cout << "1. Crear usuario" << endl;
 
-    int opcion = 0;
+    bool opcionValida;
 
-    cout << "Ingrese su opción (debe ser número): ";
+    do {
+        int opcionInt = solicitarOpcion();
+        opcionValida = true;
 
-    //crearUsuario();
+        switch (opcionInt) {
+            case 1:
+                crearUsuario();
+                break;
+            default:
+                cout << "Opción inválida" << endl;
+                opcionValida = false;
+                break;
+        }
+    } while (!opcionValida);
 
     return 0;
+}
+
+int solicitarOpcion() {
+    string opcion = "0";
+
+    do {
+        cout << "Ingrese opción (debe ser número): ";
+        cin >> opcion;
+    } while (!esEntero(opcion));
+
+    return std::stoi(opcion);
 }
 
 struct usuario crearUsuario() {
@@ -32,7 +55,7 @@ struct usuario crearUsuario() {
     do {
         cout << "Ingrese ID (debe ser número): ";
         cin >> idUsuario;
-    } while (!esIdValido(idUsuario));
+    } while (!esEntero(idUsuario));
 
     nuevoUsuario.id = std::stoi(idUsuario);
 
@@ -45,7 +68,7 @@ struct usuario crearUsuario() {
     return nuevoUsuario;
 }
 
-bool esIdValido(string id) {
+bool esEntero(string id) {
     if (id.empty()) {
         return false;
     }
