@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cstdio>
 #include <iostream>
 #include <limits>
@@ -16,6 +17,7 @@ int solicitarOpcion();
 string serializarUsuarios(const vector<usuario>& usuarios);
 void crearUsuario(vector<usuario>& usuarios);
 void listarUsuarios(const vector<usuario>& usuarios);
+void eliminarUsuario(vector<usuario>& usuarios);
 bool esEntero(string id);
 void esperarTecla();
 
@@ -39,6 +41,9 @@ int main(int argn, char* argv[]) {
                 break;
             case 2:
                 listarUsuarios(usuarios);
+                break;
+            case 3:
+                eliminarUsuario(usuarios);
                 break;
             case 5:
                 cout << endl;
@@ -118,6 +123,31 @@ void listarUsuarios(const vector<usuario>& usuarios) {
 
     for (const usuario& u : usuarios) {
         cout << "[*] ID: " << u.id << ", Nombre: " << u.nombre << ", Perfil: " << u.perfil << endl;
+    }
+
+    esperarTecla();
+}
+
+void eliminarUsuario(vector<usuario>& usuarios) {
+    cout << endl;
+    cout << "---= ELIMINACIÓN DE USUARIO =---" << endl;
+
+    string idUsuario = "";
+
+    do {
+        cout << "Ingrese ID del usuario a eliminar: ";
+        cin >> idUsuario;
+    } while (!esEntero(idUsuario));
+
+    int id = std::stoi(idUsuario);
+
+    auto it = std::find_if(usuarios.begin(), usuarios.end(), [id](const usuario& u) { return u.id == id; });
+
+    if (it != usuarios.end()) {
+        usuarios.erase(it);
+        cout << "Usuario eliminado correctamente." << endl;
+    } else {
+        cout << "No se encontró ningún usuario con el ID especificado." << endl;
     }
 
     esperarTecla();
