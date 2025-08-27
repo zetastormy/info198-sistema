@@ -10,6 +10,8 @@ using namespace std;
 struct usuario {
     int id;
     string nombre;
+    string username;
+    string password;
     string perfil;
 };
 
@@ -26,11 +28,10 @@ int main(int argn, char* argv[]) {
     while (true) {
         cout << endl;
         cout << "---= SISTEMA DE USUARIOS =---" << endl;
-        cout << "1. Crear usuario" << endl;
-        cout << "2. Listar usuarios" << endl;
-        cout << "3. Eliminar usuario" << endl;
-        cout << "4. Modificar usuario" << endl;
-        cout << "5. Salir" << endl;
+        cout << "0) Salir" << endl;
+        cout << "1) Crear usuario" << endl;
+        cout << "2) Listar usuarios" << endl;
+        cout << "3) Eliminar usuario" << endl;
         cout << endl;
 
         int opcionInt = solicitarOpcion();
@@ -45,7 +46,7 @@ int main(int argn, char* argv[]) {
             case 3:
                 eliminarUsuario(usuarios);
                 break;
-            case 5:
+            case 0:
                 cout << endl;
                 cout << "¡Hasta pronto!" << endl;
                 return 0;
@@ -77,6 +78,8 @@ string serializarUsuarios(const vector<usuario>& usuarios) {
         resultado += "  {\n";
         resultado += "    \"id\": " + to_string(u.id) + ",\n";
         resultado += "    \"nombre\": \"" + u.nombre + "\",\n";
+        resultado += "    \"username\": \"" + u.username + "\",\n";
+        resultado += "    \"password\": \"" + u.password + "\",\n";
         resultado += "    \"perfil\": \"" + u.perfil + "\"\n";
         resultado += "  }";
         if (i < usuarios.size() - 1) resultado += ",";
@@ -95,25 +98,71 @@ void crearUsuario(vector<usuario>& usuarios) {
     usuario nuevoUsuario;
     string idUsuario = "";
 
-    do {
+    while (true) {
         cout << "Ingrese ID (debe ser número): ";
         cin >> idUsuario;
-    } while (!esEntero(idUsuario));
+
+        if (esEntero(idUsuario)) break;
+
+        cout << "ID inválido. Intente nuevamente." << endl;
+    }
 
     nuevoUsuario.id = std::stoi(idUsuario);
 
     cout << "Ingrese nombre: ";
     cin >> nuevoUsuario.nombre;
 
-    cout << "Ingrese perfil: ";
-    cin >> nuevoUsuario.perfil;
+    cout << "Ingrese nombre de usuario: ";
+    cin >> nuevoUsuario.username;
 
-    usuarios.push_back(nuevoUsuario);
+    cout << "Ingrese contraseña: ";
+    cin >> nuevoUsuario.password;
+
+    while (true) {
+        string perfilUsuario = "";
+
+        cout << "Ingrese perfil (GENERAL o ADMIN): ";
+        cin >> perfilUsuario;
+
+        if (perfilUsuario == "GENERAL" || perfilUsuario == "ADMIN") {
+            nuevoUsuario.perfil = perfilUsuario;
+            break;
+        }
+
+        cout << "Perfil inválido. Intente nuevamente." << endl;
+    }
+
+    cout << endl;
+    cout << "---= RESUMEN USUARIO NUEVO =---" << endl;
+    cout << "ID: " << nuevoUsuario.id << endl;
+    cout << "Nombre: " << nuevoUsuario.nombre << endl;
+    cout << "Nombre de usuario: " << nuevoUsuario.username << endl;
+    cout << "Contraseña: " << nuevoUsuario.password << endl;
+    cout << "Perfil: " << nuevoUsuario.perfil << endl;
+    cout << endl;
+    cout << "1) Guardar usuario" << endl;
+    cout << "2) Cancelar" << endl;
+    cout << "Seleccione una opción: ";
+
+    int opcion = solicitarOpcion();
+
+    switch (opcion) {
+        case 1:
+            usuarios.push_back(nuevoUsuario);
+            break;
+        case 2:
+            cout << "Operación cancelada." << endl;
+            break;
+        default:
+            cout << "¡Opción inválida!" << endl;
+            break;
+    }
 }
 
 void listarUsuarios(const vector<usuario>& usuarios) {
     cout << endl;
     cout << "---= LISTADO DE USUARIOS =---" << endl;
+    cout << "ID | Nombre | Perfil" << endl;
 
     if (usuarios.empty()) {
         cout << "No hay usuarios registrados." << endl;
@@ -122,7 +171,7 @@ void listarUsuarios(const vector<usuario>& usuarios) {
     }
 
     for (const usuario& u : usuarios) {
-        cout << "[*] ID: " << u.id << ", Nombre: " << u.nombre << ", Perfil: " << u.perfil << endl;
+        cout << u.id << " | " << u.nombre << " | " << u.perfil << endl;
     }
 
     esperarTecla();
@@ -169,7 +218,7 @@ bool esEntero(string id) {
 
 void esperarTecla() {
     cout << endl;
-    cout << "Presiona ENTER para continuar...";
+    cout << "Presiona ENTER para volver al menú principal...";
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     cin.get();
 }
