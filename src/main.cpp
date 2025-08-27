@@ -1,4 +1,6 @@
+#include <cstdio>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <cctype>
 #include <vector>
@@ -15,22 +17,21 @@ string serializarUsuarios(const vector<usuario>& usuarios);
 void crearUsuario(vector<usuario>& usuarios);
 void listarUsuarios(const vector<usuario>& usuarios);
 bool esEntero(string id);
+void esperarTecla();
 
 int main(int argn, char* argv[]) {
     vector<usuario> usuarios;
+    while (true) {
+        cout << endl;
+        cout << "---= SISTEMA DE USUARIOS =---" << endl;
+        cout << "1. Crear usuario" << endl;
+        cout << "2. Listar usuarios" << endl;
+        cout << "3. Eliminar usuario" << endl;
+        cout << "4. Modificar usuario" << endl;
+        cout << "5. Salir" << endl;
+        cout << endl;
 
-    cout << "Sistema de usuarios" << endl;
-    cout << "1. Crear usuario" << endl;
-    cout << "2. Listar usuarios" << endl;
-    cout << "3. Eliminar usuario" << endl;
-    cout << "4. Modificar usuario" << endl;
-    cout << "5. Salir" << endl;
-
-    bool opcionValida;
-
-    do {
         int opcionInt = solicitarOpcion();
-        opcionValida = true;
 
         switch (opcionInt) {
             case 1:
@@ -39,12 +40,16 @@ int main(int argn, char* argv[]) {
             case 2:
                 listarUsuarios(usuarios);
                 break;
+            case 5:
+                cout << endl;
+                cout << "¡Hasta pronto!" << endl;
+                return 0;
             default:
-                cout << "Opción inválida" << endl;
-                opcionValida = false;
+                cout << "¡Opción inválida!" << endl;
+                esperarTecla();
                 break;
         }
-    } while (!opcionValida);
+    }
 
     return 0;
 }
@@ -79,6 +84,9 @@ string serializarUsuarios(const vector<usuario>& usuarios) {
 }
 
 void crearUsuario(vector<usuario>& usuarios) {
+    cout << endl;
+    cout << "---= CREACIÓN DE USUARIO =---" << endl;
+
     usuario nuevoUsuario;
     string idUsuario = "";
 
@@ -99,9 +107,20 @@ void crearUsuario(vector<usuario>& usuarios) {
 }
 
 void listarUsuarios(const vector<usuario>& usuarios) {
-    for (const usuario& u : usuarios) {
-        cout << "ID: " << u.id << ", Nombre: " << u.nombre << ", Perfil: " << u.perfil << endl;
+    cout << endl;
+    cout << "---= LISTADO DE USUARIOS =---" << endl;
+
+    if (usuarios.empty()) {
+        cout << "No hay usuarios registrados." << endl;
+        esperarTecla();
+        return;
     }
+
+    for (const usuario& u : usuarios) {
+        cout << "[*] ID: " << u.id << ", Nombre: " << u.nombre << ", Perfil: " << u.perfil << endl;
+    }
+
+    esperarTecla();
 }
 
 bool esEntero(string id) {
@@ -116,4 +135,11 @@ bool esEntero(string id) {
     }
 
     return true;
+}
+
+void esperarTecla() {
+    cout << endl;
+    cout << "Presiona ENTER para continuar...";
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cin.get();
 }
