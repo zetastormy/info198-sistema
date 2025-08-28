@@ -30,10 +30,10 @@ make clean
 
 ### Ejecución
 
-Después de compilar el código, puede ejecutar la aplicación utilizando el siguiente comando:
+Después de compilar el código, puede ejecutar la aplicación (estando en el directorio base para así poder usar el `.env`) utilizando el siguiente comando:
 
 ```bash
-./prog
+./bin/prog
 ```
 
 Este desplegará una interfaz de línea de comandos (CLI) que le permitirá trabajar con las distintas funciones ofrecidas
