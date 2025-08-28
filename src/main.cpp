@@ -51,7 +51,7 @@ int main(int argn, char* argv[]) {
                 cout << "¡Hasta pronto!" << endl;
                 return 0;
             default:
-                cout << "¡Opción inválida!" << endl;
+                cout << "(ERROR) ¡Opción inválida!" << endl;
                 esperarTecla();
                 break;
         }
@@ -104,7 +104,7 @@ void crearUsuario(vector<usuario>& usuarios) {
 
         if (esEntero(idUsuario)) break;
 
-        cout << "ID inválido. Intente nuevamente." << endl;
+        cout << "(ERROR) ID inválido. Intente nuevamente." << endl;
     }
 
     nuevoUsuario.id = std::stoi(idUsuario);
@@ -129,7 +129,7 @@ void crearUsuario(vector<usuario>& usuarios) {
             break;
         }
 
-        cout << "Perfil inválido. Intente nuevamente." << endl;
+        cout << "(ERROR) Perfil inválido. Intente nuevamente." << endl;
     }
 
     cout << endl;
@@ -154,7 +154,7 @@ void crearUsuario(vector<usuario>& usuarios) {
             cout << "Operación cancelada." << endl;
             break;
         default:
-            cout << "¡Opción inválida!" << endl;
+            cout << "(ERROR) ¡Opción inválida!" << endl;
             break;
     }
 }
@@ -191,12 +191,15 @@ void eliminarUsuario(vector<usuario>& usuarios) {
     int id = std::stoi(idUsuario);
 
     auto it = std::find_if(usuarios.begin(), usuarios.end(), [id](const usuario& u) { return u.id == id; });
+    string perfil = it -> perfil;
 
-    if (it != usuarios.end()) {
+    if (it == usuarios.end()) {
+        cout << "(ERROR) No se encontró ningún usuario con el ID especificado." << endl;
+    } else if (perfil == "ADMIN"){
+        cout << "(ERROR) No se puede eliminar un usuario con perfil ADMIN." << endl;
+    } else {
         usuarios.erase(it);
         cout << "Usuario eliminado correctamente." << endl;
-    } else {
-        cout << "No se encontró ningún usuario con el ID especificado." << endl;
     }
 
     esperarTecla();
