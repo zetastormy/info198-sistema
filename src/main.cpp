@@ -194,6 +194,8 @@ void crearUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
         cout << "Ingrese perfil (GENERAL o ADMIN): ";
         cin >> perfilUsuario;
 
+        std::transform(perfilUsuario.begin(), perfilUsuario.end(), perfilUsuario.begin(), ::toupper);
+
         if (perfilUsuario == "GENERAL" || perfilUsuario == "ADMIN") {
             nuevoUsuario.perfil = perfilUsuario;
             break;
