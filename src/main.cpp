@@ -1,8 +1,10 @@
 #include "include/dotenv.h"
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
 #include <iostream>
 #include <limits>
+#include <ostream>
 #include <string>
 #include <vector>
 #include <sstream>
@@ -13,10 +15,10 @@ using namespace std::chrono;
 
 struct usuario {
     int id;
-    string nombre;
-    string username;
-    string password;
-    string perfil;
+    char nombre[21];
+    char username[21];
+    char password[21];
+    char perfil[21];
 };
 
 void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios);
@@ -179,30 +181,74 @@ void crearUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
 
     nuevoUsuario.id = idUsuario;
 
-    cout << "Ingrese nombre: ";
-    cin >> nuevoUsuario.nombre;
+    while (true) {
+        char nombreUsuario[21];
+        cout << "Ingrese nombre: ";
+        cin >> nombreUsuario;
+        cout << strlen(nombreUsuario) << endl;
 
-    cout << "Ingrese nombre de usuario: ";
-    cin >> nuevoUsuario.username;
+        if (strlen(nombreUsuario) < 20) {
+           strcpy(nuevoUsuario.nombre, nombreUsuario);
+           cout << "ola" << endl;
+           break;
+       }
 
-    cout << "Ingrese contraseña: ";
-    cin >> nuevoUsuario.password;
+       cout << "(ERROR) Nombre sobre los 20 caracteres. Intente nuevamente." << endl;
+    }
 
     while (true) {
-        string perfilUsuario = "";
+        char usernameUsuario[21];
+        cout << "Ingrese nombre de usuario: ";
+        cin >> usernameUsuario;
 
-        cout << "Ingrese perfil (GENERAL o ADMIN): ";
-        cin >> perfilUsuario;
+        if (strlen(usernameUsuario) < 20) {
+            strcpy(nuevoUsuario.username, usernameUsuario);
+            break;
+        }
 
-        std::transform(perfilUsuario.begin(), perfilUsuario.end(), perfilUsuario.begin(), ::toupper);
+        cout << "(ERROR) Nombre de usuario sobre los 20 caracteres. Intente nuevamente." << endl;
+    }
 
-        if (perfilUsuario == "GENERAL" || perfilUsuario == "ADMIN") {
-            nuevoUsuario.perfil = perfilUsuario;
+    while (true) {
+        char passwordUsuario[21];
+        cout << "Ingrese contraseña: ";
+        cin >> passwordUsuario;
+
+        if (strlen(passwordUsuario) < 20) {
+            strcpy(nuevoUsuario.password, passwordUsuario);
+            break;
+        }
+
+        cout << "(ERROR) Contraseña sobre los 20 caracteres. Intente nuevamente." << endl;
+    }
+
+    while (true) {
+        char perfilUsuario[21];
+
+        while (true) {
+            cout << "Ingrese perfil (GENERAL o ADMIN): ";
+            cin >> perfilUsuario;
+
+            if (strlen(perfilUsuario) < 20) {
+                break;
+            }
+
+            cout << "(ERROR) Perfil sobre los 20 caracteres. Intente nuevamente." << endl;
+        }
+
+        // Convertimos a mayúsculas
+        for (int i = 0; perfilUsuario[i]; i++) {
+            perfilUsuario[i] = toupper(perfilUsuario[i]);
+        }
+
+        if (strcmp(perfilUsuario, "GENERAL") == 0 || strcmp(perfilUsuario, "ADMIN") == 0) {
+            strcpy(nuevoUsuario.perfil, perfilUsuario);
             break;
         }
 
         cout << "(ERROR) Perfil inválido. Intente nuevamente." << endl;
     }
+
 
     cout << endl;
     cout << "---= RESUMEN USUARIO NUEVO =---" << endl;
@@ -270,11 +316,10 @@ void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
     int id = std::stoi(idUsuario);
 
     auto it = std::find_if(usuarios.begin(), usuarios.end(), [id](const usuario& u) { return u.id == id; });
-    string perfil = it -> perfil;
 
     if (it == usuarios.end()) {
         cout << "(ERROR) No se encontró ningún usuario con el ID especificado." << endl;
-    } else if (perfil == "ADMIN"){
+    } else if (strcmp(it -> perfil, "ADMIN") == 0){
         cout << "(ERROR) No se puede eliminar un usuario con perfil ADMIN." << endl;
     } else {
         eliminarUsuarioGuardado(usuarios, id, archivoUsuarios);
