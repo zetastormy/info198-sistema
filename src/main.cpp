@@ -7,7 +7,9 @@
 #include <vector>
 #include <sstream>
 #include <filesystem>
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
 
 struct usuario {
     int id;
@@ -71,6 +73,8 @@ int main(int argn, char* argv[]) {
 }
 
 void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios) {
+    auto start = high_resolution_clock::now();
+
     filesystem::path ruta(archivoUsuarios);
 
     if (!exists(ruta.parent_path())) {
@@ -101,9 +105,14 @@ void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios) {
     }
 
     archivo.close();
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    cout << "(INFO) Los usuarios se cargaron en: " << duration.count() << " microsegundos" << endl;
 }
 
 void guardarUsuario(usuario nuevoUsuario, string archivoUsuarios) {
+    auto start = high_resolution_clock::now();
     ofstream archivo(archivoUsuarios, ios::app);
 
     if (!archivo.is_open()) {
@@ -115,9 +124,14 @@ void guardarUsuario(usuario nuevoUsuario, string archivoUsuarios) {
     archivo << nuevoUsuario.id << " " << nuevoUsuario.nombre << " " << nuevoUsuario.username << " " << nuevoUsuario.password << " " << nuevoUsuario.perfil << endl;
 
     archivo.close();
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    cout << "(INFO) El usuario se guardó en: " << duration.count() << " microsegundos" << endl;
 }
 
 void eliminarUsuarioGuardado(vector<usuario>& usuarios, int id, string archivoUsuarios) {
+    auto start = high_resolution_clock::now();
     ofstream archivo(archivoUsuarios);
 
     if (!archivo.is_open()) {
@@ -133,6 +147,10 @@ void eliminarUsuarioGuardado(vector<usuario>& usuarios, int id, string archivoUs
     }
 
     archivo.close();
+    auto stop = high_resolution_clock::now();
+    auto duration = duration_cast<microseconds>(stop - start);
+
+    cout << "(INFO) El usuario se eliminó en: " << duration.count() << " microsegundos" << endl;
 }
 
 int solicitarOpcion() {
