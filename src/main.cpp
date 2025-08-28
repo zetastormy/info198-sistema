@@ -1,10 +1,12 @@
+#include "include/dotenv.h"
 #include <algorithm>
 #include <cstdio>
 #include <iostream>
 #include <limits>
 #include <string>
-#include <cctype>
 #include <vector>
+#include <sstream>
+#include <filesystem>
 using namespace std;
 
 struct usuario {
@@ -15,16 +17,24 @@ struct usuario {
     string perfil;
 };
 
+void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios);
+void guardarUsuario(vector<usuario>& usuarios, string archivoUsuarios);
+void eliminarUsuarioGuardado(vector<usuario>& usuarios, int id, string archivoUsuarios);
 int solicitarOpcion();
 string serializarUsuarios(const vector<usuario>& usuarios);
-void crearUsuario(vector<usuario>& usuarios);
+void crearUsuario(vector<usuario>& usuarios, string archivoUsuarios);
 void listarUsuarios(const vector<usuario>& usuarios);
-void eliminarUsuario(vector<usuario>& usuarios);
+void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios);
 bool esEntero(string id);
 void esperarTecla();
 
 int main(int argn, char* argv[]) {
+    dotenv env(".env");
     vector<usuario> usuarios;
+    string archivoUsuarios = env.get("USER_FILE");
+
+    cargarDatos(usuarios, archivoUsuarios);
+
     while (true) {
         cout << endl;
         cout << "---= SISTEMA DE USUARIOS =---" << endl;
@@ -38,13 +48,13 @@ int main(int argn, char* argv[]) {
 
         switch (opcionInt) {
             case 1:
-                crearUsuario(usuarios);
+                crearUsuario(usuarios, archivoUsuarios);
                 break;
             case 2:
                 listarUsuarios(usuarios);
                 break;
             case 3:
-                eliminarUsuario(usuarios);
+                eliminarUsuario(usuarios, archivoUsuarios);
                 break;
             case 0:
                 cout << endl;
@@ -60,6 +70,71 @@ int main(int argn, char* argv[]) {
     return 0;
 }
 
+void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios) {
+    filesystem::path ruta(archivoUsuarios);
+
+    if (!exists(ruta.parent_path())) {
+        cout << "(INFO) El directorio no existía. Se creará: " << ruta.parent_path() << endl;
+        filesystem::create_directories(ruta.parent_path());
+    }
+
+    if (!exists(ruta)) {
+        cout << "(INFO) El archivo no existía. Se creará: " << archivoUsuarios << endl;
+        ofstream nuevoArchivo(archivoUsuarios);
+        nuevoArchivo.close();
+    }
+
+    ifstream archivo(archivoUsuarios);
+
+    if (!archivo.is_open()) {
+        cout << "(ERROR) No se pudo abrir el archivo de usuarios." << endl;
+        esperarTecla();
+        return;
+    }
+
+    string linea;
+    while (getline(archivo, linea)) {
+        usuario u;
+        stringstream ss(linea); // Lee la línea actual y separa el stream por espacios
+        ss >> u.id >> u.nombre >> u.username >> u.password >> u.perfil;
+        usuarios.push_back(u);
+    }
+
+    archivo.close();
+}
+
+void guardarUsuario(usuario nuevoUsuario, string archivoUsuarios) {
+    ofstream archivo(archivoUsuarios, ios::app);
+
+    if (!archivo.is_open()) {
+        cout << "(ERROR) No se pudo abrir el archivo de usuarios." << endl;
+        esperarTecla();
+        return;
+    }
+
+    archivo << nuevoUsuario.id << " " << nuevoUsuario.nombre << " " << nuevoUsuario.username << " " << nuevoUsuario.password << " " << nuevoUsuario.perfil << endl;
+
+    archivo.close();
+}
+
+void eliminarUsuarioGuardado(vector<usuario>& usuarios, int id, string archivoUsuarios) {
+    ofstream archivo(archivoUsuarios);
+
+    if (!archivo.is_open()) {
+        cout << "(ERROR) No se pudo abrir el archivo de usuarios." << endl;
+        esperarTecla();
+        return;
+    }
+
+    for (const usuario& u : usuarios) {
+        if (u.id != id) {
+            archivo << u.id << " " << u.nombre << " " << u.username << " " << u.password << " " << u.perfil << endl;
+        }
+    }
+
+    archivo.close();
+}
+
 int solicitarOpcion() {
     string opcion = "0";
 
@@ -71,43 +146,14 @@ int solicitarOpcion() {
     return std::stoi(opcion);
 }
 
-string serializarUsuarios(const vector<usuario>& usuarios) {
-    string resultado = "[\n";
-    for (size_t i = 0; i < usuarios.size(); i++) {
-        const usuario& u = usuarios[i];
-        resultado += "  {\n";
-        resultado += "    \"id\": " + to_string(u.id) + ",\n";
-        resultado += "    \"nombre\": \"" + u.nombre + "\",\n";
-        resultado += "    \"username\": \"" + u.username + "\",\n";
-        resultado += "    \"password\": \"" + u.password + "\",\n";
-        resultado += "    \"perfil\": \"" + u.perfil + "\"\n";
-        resultado += "  }";
-        if (i < usuarios.size() - 1) resultado += ",";
-        resultado += "\n";
-    }
-
-    resultado += "]";
-
-    return resultado;
-}
-
-void crearUsuario(vector<usuario>& usuarios) {
+void crearUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
     cout << endl;
     cout << "---= CREACIÓN DE USUARIO =---" << endl;
 
     usuario nuevoUsuario;
-    string idUsuario = "";
+    int idUsuario = usuarios.empty() ? 1 : usuarios.back().id + 1;
 
-    while (true) {
-        cout << "Ingrese ID (debe ser número): ";
-        cin >> idUsuario;
-
-        if (esEntero(idUsuario)) break;
-
-        cout << "(ERROR) ID inválido. Intente nuevamente." << endl;
-    }
-
-    nuevoUsuario.id = std::stoi(idUsuario);
+    nuevoUsuario.id = idUsuario;
 
     cout << "Ingrese nombre: ";
     cin >> nuevoUsuario.nombre;
@@ -148,6 +194,7 @@ void crearUsuario(vector<usuario>& usuarios) {
 
     switch (opcion) {
         case 1:
+            guardarUsuario(nuevoUsuario, archivoUsuarios);
             usuarios.push_back(nuevoUsuario);
             break;
         case 2:
@@ -177,7 +224,7 @@ void listarUsuarios(const vector<usuario>& usuarios) {
     esperarTecla();
 }
 
-void eliminarUsuario(vector<usuario>& usuarios) {
+void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
     cout << endl;
     cout << "---= ELIMINACIÓN DE USUARIO =---" << endl;
 
@@ -198,6 +245,7 @@ void eliminarUsuario(vector<usuario>& usuarios) {
     } else if (perfil == "ADMIN"){
         cout << "(ERROR) No se puede eliminar un usuario con perfil ADMIN." << endl;
     } else {
+        eliminarUsuarioGuardado(usuarios, id, archivoUsuarios);
         usuarios.erase(it);
         cout << "Usuario eliminado correctamente." << endl;
     }
