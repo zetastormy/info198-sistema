@@ -138,10 +138,16 @@ void eliminarUsuarioGuardado(vector<usuario>& usuarios, int id, string archivoUs
 int solicitarOpcion() {
     string opcion = "0";
 
-    do {
+    while (true) {
         cout << "Ingrese opción (debe ser número): ";
         cin >> opcion;
-    } while (!esEntero(opcion));
+
+        if (esEntero(opcion)) {
+            break;
+        }
+
+        cout << "(ERROR) Opción inválida. Intente nuevamente." << endl;
+    }
 
     return std::stoi(opcion);
 }
