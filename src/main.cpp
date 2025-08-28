@@ -231,6 +231,12 @@ void listarUsuarios(const vector<usuario>& usuarios) {
 }
 
 void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
+    if (usuarios.empty()) {
+        cout << "No hay usuarios registrados para eliminar." << endl;
+        esperarTecla();
+        return;
+    }
+
     cout << endl;
     cout << "---= ELIMINACIÓN DE USUARIO =---" << endl;
 
