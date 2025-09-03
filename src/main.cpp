@@ -185,11 +185,9 @@ void crearUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
         char nombreUsuario[21];
         cout << "Ingrese nombre: ";
         cin >> nombreUsuario;
-        cout << strlen(nombreUsuario) << endl;
 
         if (strlen(nombreUsuario) < 20) {
            strcpy(nuevoUsuario.nombre, nombreUsuario);
-           cout << "ola" << endl;
            break;
        }
 
@@ -319,7 +317,7 @@ void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
 
     if (it == usuarios.end()) {
         cout << "(ERROR) No se encontró ningún usuario con el ID especificado." << endl;
-    } else if (strcmp(it -> perfil, "ADMIN") == 0){
+    } else if (strcmp(it -> perfil, "ADMIN") == 0) {
         cout << "(ERROR) No se puede eliminar un usuario con perfil ADMIN." << endl;
     } else {
         eliminarUsuarioGuardado(usuarios, id, archivoUsuarios);
