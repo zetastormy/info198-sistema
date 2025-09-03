@@ -5,9 +5,8 @@
 #include <iostream>
 #include <limits>
 #include <ostream>
-#include <string>
 #include <vector>
-#include <sstream>
+#include <string>
 #include <filesystem>
 #include <chrono>
 using namespace std;
@@ -23,9 +22,8 @@ struct usuario {
 
 void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios);
 void guardarUsuario(vector<usuario>& usuarios, string archivoUsuarios);
-void eliminarUsuarioGuardado(vector<usuario>& usuarios, int id, string archivoUsuarios);
+void eliminarUsuarioGuardado(vector<usuario>& usuarios, string archivoUsuarios);
 int solicitarOpcion();
-string serializarUsuarios(const vector<usuario>& usuarios);
 void crearUsuario(vector<usuario>& usuarios, string archivoUsuarios);
 void listarUsuarios(const vector<usuario>& usuarios);
 void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios);
@@ -90,7 +88,7 @@ void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios) {
         nuevoArchivo.close();
     }
 
-    ifstream archivo(archivoUsuarios);
+    ifstream archivo(archivoUsuarios, ios::binary);
 
     if (!archivo.is_open()) {
         cout << "(ERROR) No se pudo abrir el archivo de usuarios." << endl;
@@ -98,11 +96,11 @@ void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios) {
         return;
     }
 
-    string linea;
-    while (getline(archivo, linea)) {
-        usuario u;
-        stringstream ss(linea); // Lee la línea actual y separa el stream por espacios
-        ss >> u.id >> u.nombre >> u.username >> u.password >> u.perfil;
+    usuario u;
+    while (archivo.read((char*)&u, sizeof(usuario))) {
+        if (strcmp(u.nombre, "empty") == 0) {
+            break;
+        }
         usuarios.push_back(u);
     }
 
@@ -115,7 +113,7 @@ void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios) {
 
 void guardarUsuario(usuario nuevoUsuario, string archivoUsuarios) {
     auto start = high_resolution_clock::now();
-    ofstream archivo(archivoUsuarios, ios::app);
+    ofstream archivo(archivoUsuarios, ios::binary | ios::app);
 
     if (!archivo.is_open()) {
         cout << "(ERROR) No se pudo abrir el archivo de usuarios." << endl;
@@ -123,18 +121,19 @@ void guardarUsuario(usuario nuevoUsuario, string archivoUsuarios) {
         return;
     }
 
-    archivo << nuevoUsuario.id << " " << nuevoUsuario.nombre << " " << nuevoUsuario.username << " " << nuevoUsuario.password << " " << nuevoUsuario.perfil << endl;
-
+    archivo.write((char*) &nuevoUsuario, sizeof(usuario));
     archivo.close();
+
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
 
     cout << "(INFO) El usuario se guardó en: " << duration.count() << " microsegundos" << endl;
 }
 
-void eliminarUsuarioGuardado(vector<usuario>& usuarios, int id, string archivoUsuarios) {
+void eliminarUsuarioGuardado(vector<usuario>& usuarios, string archivoUsuarios) {
     auto start = high_resolution_clock::now();
-    ofstream archivo(archivoUsuarios);
+
+    ofstream archivo(archivoUsuarios, ios::binary);
 
     if (!archivo.is_open()) {
         cout << "(ERROR) No se pudo abrir el archivo de usuarios." << endl;
@@ -143,12 +142,11 @@ void eliminarUsuarioGuardado(vector<usuario>& usuarios, int id, string archivoUs
     }
 
     for (const usuario& u : usuarios) {
-        if (u.id != id) {
-            archivo << u.id << " " << u.nombre << " " << u.username << " " << u.password << " " << u.perfil << endl;
-        }
+        archivo.write((char*) &u, sizeof(usuario));
     }
 
     archivo.close();
+
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
 
@@ -320,8 +318,8 @@ void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
     } else if (strcmp(it -> perfil, "ADMIN") == 0) {
         cout << "(ERROR) No se puede eliminar un usuario con perfil ADMIN." << endl;
     } else {
-        eliminarUsuarioGuardado(usuarios, id, archivoUsuarios);
         usuarios.erase(it);
+        eliminarUsuarioGuardado(usuarios, archivoUsuarios);
         cout << "Usuario eliminado correctamente." << endl;
     }
 
