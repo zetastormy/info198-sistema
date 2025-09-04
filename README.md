@@ -62,4 +62,4 @@ El programa dispone de múltiples variables de entorno para facilitar la manipul
 
 - `USER_FILE`: que especifica el archivo donde se almacenan los usuarios. Por defecto, el valor de esta variable es `data/usuarios.txt` que creará un directorio llamado `data` si no existe.
 
-- `PROFILE_FILE`: que especifica el archivo donde se almacenan los perfiles y sus permisos respectivos. Por defecto, el valor de esta variable es `data/perfiles.txt` que creará un directorio llamado `data` si no existe.
+- `PROFILE_FILE`: que especifica el archivo donde se almacenan los perfiles y sus permisos respectivos. Este archivo se encuentra presente en el repositorio en `config/perfiles.txt`, si este no se encuentra presente, el programa principal no manejará permisos.
