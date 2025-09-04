@@ -1,6 +1,6 @@
 BIN = bin
-SRC = src/main.cpp
-OUT = $(BIN)/prog
+SRC = src/admin_usuarios.cpp
+OUT = $(BIN)/admin_usuarios
 
 all: $(OUT)
 
