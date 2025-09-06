@@ -20,7 +20,7 @@ struct usuario {
     char perfil[21];
 };
 
-void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios);
+void cargarUsuarios(vector<usuario>& usuarios, string archivoUsuarios);
 void guardarUsuario(vector<usuario>& usuarios, string archivoUsuarios);
 void eliminarUsuarioGuardado(vector<usuario>& usuarios, string archivoUsuarios);
 int solicitarOpcion();
@@ -35,7 +35,7 @@ int main(int argn, char* argv[]) {
     vector<usuario> usuarios;
     string archivoUsuarios = env.get("USER_FILE");
 
-    cargarDatos(usuarios, archivoUsuarios);
+    cargarUsuarios(usuarios, archivoUsuarios);
 
     while (true) {
         cout << endl;
@@ -72,7 +72,7 @@ int main(int argn, char* argv[]) {
     return 0;
 }
 
-void cargarDatos(vector<usuario>& usuarios, string archivoUsuarios) {
+void cargarUsuarios(vector<usuario>& usuarios, string archivoUsuarios) {
     auto start = high_resolution_clock::now();
 
     filesystem::path ruta(archivoUsuarios);
