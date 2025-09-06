@@ -1,5 +1,5 @@
 BIN = bin
-SRC = src/admin_usuarios.cpp
+SRC = admin_usuarios.cpp
 OUT = $(BIN)/admin_usuarios
 
 all: $(OUT)

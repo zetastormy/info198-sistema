@@ -1,4 +1,4 @@
-#include "include/dotenv.h"
+#include "../include/dotenv.h"
 #include <algorithm>
 #include <cstdio>
 #include <cstring>
@@ -30,7 +30,7 @@ void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios);
 bool esEntero(string id);
 void esperarTecla();
 
-int main(int argn, char* argv[]) {
+int main(int argc, char* argv[]) {
     dotenv env(".env");
     vector<usuario> usuarios;
     string archivoUsuarios = env.get("USER_FILE");
@@ -79,7 +79,7 @@ void cargarUsuarios(vector<usuario>& usuarios, string archivoUsuarios) {
 
     if (!exists(ruta.parent_path())) {
         cout << "(INFO) El directorio no existía. Se creará: " << ruta.parent_path() << endl;
-        filesystem::create_directories(ruta.parent_path());
+        create_directories(ruta.parent_path());
     }
 
     if (!exists(ruta)) {
