@@ -1,0 +1,13 @@
+#!/bin/bash
+dir_progs=( "src/admin_usuarios" "src/pgm" )
+
+for dir_prog in "${dir_progs[@]}"
+do
+    echo "---= COMPILANDO $dir_prog =---"
+    make -C $dir_prog
+    echo ""
+done
+
+echo "---= COMPILACIÓN TERMINADA =---"
+echo "Si no hay errores, los binarios a cada programa estarán en bin/."
+echo "Lea README.md para más información."

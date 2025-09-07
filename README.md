@@ -18,22 +18,18 @@ usuarios almacenados.
 
 ### Compilación
 
-Para ejecutar la aplicación, primero debe compilar el código fuente utilizando el siguiente comando:
+Para facilitar la compilación de los programas, se ha puesto a su disposición el script `build.sh`, este ejecutará
+el comando `make` en los directorios de cada uno de los programas donde se encuentra su respectivo Makefile. Simplemente ejecute el script de la siguiente manera:
 
 ```bash
-make
+./build.sh
 ```
 
-Este comando creará un directorio llamado `bin` donde se almacenarán los ejecutables. En caso de
-que desee eliminar este directorio, puede utilizar el siguiente comando:
-
-```bash
-make clean
-```
+Posteriormente, podrá encontrar el ejecutable de cada programa en la carpeta `bin/` generada.
 
 ### Ejecución
 
-Una vez compilados, puede ejecutar alguno de los siguientes programas disponibles:
+Desde el directorio raíz del programa (donde está ubicado el archivo `.env`), usted podrá ejecutar los programas de la siguientes maneras:
 
 - **Administrador de usuarios:**
 
