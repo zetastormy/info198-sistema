@@ -1,4 +1,4 @@
-BIN = bin
+BIN = ../../bin
 SRC = admin_usuarios.cpp
 OUT = $(BIN)/admin_usuarios
 
@@ -9,6 +9,3 @@ $(BIN):
 
 $(OUT): $(SRC) | $(BIN)
 	g++ $(SRC) -o $(OUT)
-
-clean:
-	rm -rf $(BIN)
