@@ -9,5 +9,5 @@ do
 done
 
 echo "---= COMPILACIÓN TERMINADA =---"
-echo "Si no hay errores, los binarios a cada programa estarán en bin/."
+echo "Si no hay errores, los binarios de cada programa estarán en bin/."
 echo "Lea README.md para más información."
