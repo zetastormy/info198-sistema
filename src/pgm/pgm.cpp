@@ -1,8 +1,11 @@
+#include "../include/args.h"
 #include "../include/dotenv.h"
 #include <vector>
 #include <chrono>
 #include <cstring>
 #include <filesystem>
+#include <string>
+#include <cstring>
 using namespace std;
 using namespace std::chrono;
 
@@ -14,21 +17,33 @@ struct usuario {
     char perfil[21];
 };
 
-bool verificarArgumentos(int argc, char* argv[]);
 void cargarUsuarios(vector<usuario>& usuarios, string archivoUsuarios);
+bool autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string passwordIngresada);
 int solicitarOpcion();
 bool esEntero(string id);
 void esperarTecla();
 
 int main(int argc, char* argv[]) {
-    if (argc < 6) {
-        cout << "(ERROR) Argumentos insuficientes." << endl;
-        cout << "Ejecute como ./bin/pgm -u <usuario> -p <contraseña> -f <ruta a texto a evaluar>" << endl;
-        return 0;
-    }
+    args::ArgumentParser parser("Programa principal del sistema creado para INFO188.");
+    args::HelpFlag help(parser, "help", "Muestra este menú de ayuda", {'h', "help"});
+    args::Group obligatorio(parser, "ARGUMENTOS OBLIGATORIOS:", args::Group::Validators::All);
+    args::ValueFlag<string> usuarioIngresado(obligatorio, "user", "El nombre de usuario", {'u', "user"});
+    args::ValueFlag<string> passwordIngresada(obligatorio, "user", "La contraseña del usuario", {'p', "password"});
+    args::ValueFlag<string> rutaArchivoIngresada(obligatorio, "file", "El archivo a analizar", {'f', "file"});
 
-    if (!verificarArgumentos(argc, argv)) {
+    try {
+        parser.ParseCLI(argc, argv);
+    } catch (args::Help) {
+        std::cout << parser;
         return 0;
+    } catch (args::ParseError e) {
+        std::cerr << e.what() << std::endl;
+        std::cerr << parser;
+        return 1;
+    } catch (args::ValidationError e) {
+        std::cerr << e.what() << std::endl;
+        std::cerr << parser;
+        return 1;
     }
 
     dotenv env(".env");
@@ -37,6 +52,10 @@ int main(int argc, char* argv[]) {
 
     cargarUsuarios(usuarios, archivoUsuarios);
 
+    if (!autenticarUsuario(usuarios, args::get(usuarioIngresado), args::get(passwordIngresada))) {
+        cout << "(ERROR) Usuario o contraseña incorrectos." << endl;
+        return 1;
+    }
 
     while (true) {
         cout << endl;
@@ -131,6 +150,16 @@ void cargarUsuarios(vector<usuario>& usuarios, string archivoUsuarios) {
     auto duration = duration_cast<microseconds>(stop - start);
 
     cout << "(INFO) Los usuarios se cargaron en: " << duration.count() << " microsegundos" << endl;
+}
+
+bool autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string passwordIngresada) {
+    for (const usuario& u : usuarios) {
+        if (strcmp(u.username, usuarioIngresado.c_str()) == 0 && strcmp(u.password, passwordIngresada.c_str()) == 0) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 int solicitarOpcion() {
