@@ -1,5 +1,5 @@
 BIN = ../../bin
-SRC = admin_usuarios.cpp ../common/util.cpp
+SRC = admin_usuarios.cpp ../common/util.cpp ../common/conteo.cpp ../common/calcula_funcion.cpp
 OUT = $(BIN)/admin_usuarios
 
 all: $(OUT)

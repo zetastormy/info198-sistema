@@ -1,6 +1,8 @@
 #include "../include/args.h"
 #include "../include/dotenv.h"
 #include "../include/util.h"
+#include "../include/conteo.h"
+#include "../include/calcula_funcion.h"
 #include <cstring>
 #include <string>
 #include <cstring>
@@ -82,14 +84,10 @@ int main(int argc, char* argv[]) {
                 esperarTecla();
                 break;
             case 5:
-                // TODO: Llamar a método de f(x)....
-                cout << "LLAMADA A MÉTODO PRINCIPAL DE CALCULA FUNCION" << endl;
-                esperarTecla();
+                calcularFuncion();
                 break;
             case 6:
-                // TODO: Llamar a método de conteo.
-                cout << "LLAMADA A MÉTODO PRINCIPAL DE CONTEO SOBRE TEXTO" << endl;
-                esperarTecla();
+                imprimirConteo(args::get(rutaArchivoIngresada));
                 break;
             case 0:
                 cout << endl;
