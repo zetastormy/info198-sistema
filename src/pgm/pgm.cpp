@@ -10,7 +10,7 @@ int autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string
 int solicitarOpcion(char* perfil);
 
 int main(int argc, char* argv[]) {
-    args::ArgumentParser parser("Programa principal del sistema creado para INFO188.");
+    args::ArgumentParser parser("Programa principal del sistema creado para INFO198.");
     args::HelpFlag help(parser, "help", "Muestra este menú de ayuda", {'h', "help"});
     args::Group obligatorio(parser, "ARGUMENTOS OBLIGATORIOS:", args::Group::Validators::All);
     args::ValueFlag<string> usuarioIngresado(obligatorio, "user", "El nombre de usuario", {'u', "user"});
