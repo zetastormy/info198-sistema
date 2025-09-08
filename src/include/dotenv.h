@@ -27,8 +27,8 @@
  */
 
 
-#ifndef dotenv_H
-#define dotenv_H
+#ifndef DOTENV_H
+#define DOTENV_H
 
 #include <string>
 #include <unordered_map>

@@ -1,34 +1,21 @@
+#include "../include/util.h"
 #include "../include/dotenv.h"
 #include <algorithm>
-#include <cstdio>
 #include <cstring>
 #include <iostream>
-#include <limits>
 #include <ostream>
 #include <vector>
 #include <string>
-#include <filesystem>
 #include <chrono>
 using namespace std;
 using namespace std::chrono;
 
-struct usuario {
-    int id;
-    char nombre[21];
-    char username[21];
-    char password[21];
-    char perfil[21];
-};
-
-void cargarUsuarios(vector<usuario>& usuarios, string archivoUsuarios);
 void guardarUsuario(vector<usuario>& usuarios, string archivoUsuarios);
 void eliminarUsuarioGuardado(vector<usuario>& usuarios, string archivoUsuarios);
 int solicitarOpcion();
 void crearUsuario(vector<usuario>& usuarios, string archivoUsuarios);
 void listarUsuarios(const vector<usuario>& usuarios);
 void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios);
-bool esEntero(string id);
-void esperarTecla();
 
 int main(int argc, char* argv[]) {
     dotenv env(".env");
@@ -71,45 +58,6 @@ int main(int argc, char* argv[]) {
     }
 
     return 0;
-}
-
-void cargarUsuarios(vector<usuario>& usuarios, string archivoUsuarios) {
-    auto start = high_resolution_clock::now();
-
-    filesystem::path ruta(archivoUsuarios);
-
-    if (!exists(ruta.parent_path())) {
-        cout << "(INFO) El directorio no existía. Se creará: " << ruta.parent_path() << endl;
-        create_directories(ruta.parent_path());
-    }
-
-    if (!exists(ruta)) {
-        cout << "(INFO) El archivo no existía. Se creará: " << archivoUsuarios << endl;
-        ofstream nuevoArchivo(archivoUsuarios);
-        nuevoArchivo.close();
-    }
-
-    ifstream archivo(archivoUsuarios, ios::binary);
-
-    if (!archivo.is_open()) {
-        cout << "(ERROR) No se pudo abrir el archivo de usuarios." << endl;
-        esperarTecla();
-        return;
-    }
-
-    usuario u;
-    while (archivo.read((char*)&u, sizeof(usuario))) {
-        if (strcmp(u.nombre, "empty") == 0) {
-            break;
-        }
-        usuarios.push_back(u);
-    }
-
-    archivo.close();
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-
-    cout << "(INFO) Los usuarios se cargaron en: " << duration.count() << " microsegundos" << endl;
 }
 
 void guardarUsuario(usuario nuevoUsuario, string archivoUsuarios) {
@@ -322,25 +270,4 @@ void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
     }
 
     esperarTecla();
-}
-
-bool esEntero(string id) {
-    if (id.empty()) {
-        return false;
-    }
-
-    for (size_t i = 0; i < id.length(); ++i) {
-        if (!std::isdigit(id[i])) {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void esperarTecla() {
-    cout << endl;
-    cout << "Presiona ENTER para volver al menú principal...";
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-    cin.get();
 }
