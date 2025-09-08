@@ -16,6 +16,13 @@ usuarios almacenados.
 
 ## ¿Cómo usar la aplicación?
 
+### Requisitos
+
+- Distribución de Linux moderna
+- Bash (>=5.3)
+- GNU Make (>=4.4)
+- Lenguaje `es_CL.UTF-8` ([Más información](https://wiki.archlinux.org/title/Locale))
+
 ### Compilación
 
 Para facilitar la compilación de los programas, se ha puesto a su disposición el script `build.sh`, este ejecutará
