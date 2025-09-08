@@ -18,8 +18,8 @@ struct usuario {
 };
 
 void cargarUsuarios(vector<usuario>& usuarios, string archivoUsuarios);
-bool autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string passwordIngresada);
-int solicitarOpcion();
+int autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string passwordIngresada);
+int solicitarOpcion(char* perfil);
 bool esEntero(string id);
 void esperarTecla();
 
@@ -51,15 +51,20 @@ int main(int argc, char* argv[]) {
     string archivoUsuarios = env.get("USER_FILE");
 
     cargarUsuarios(usuarios, archivoUsuarios);
+    int indiceUsuario = autenticarUsuario(usuarios, args::get(usuarioIngresado), args::get(passwordIngresada));
 
-    if (!autenticarUsuario(usuarios, args::get(usuarioIngresado), args::get(passwordIngresada))) {
+    if (indiceUsuario == -1) {
         cout << "(ERROR) Usuario o contraseña incorrectos." << endl;
         return 1;
     }
 
+    usuario u = usuarios[indiceUsuario];
+
     while (true) {
         cout << endl;
         cout << "---= SISTEMA DE USUARIOS =---" << endl;
+        cout << "Usuario: " << args::get(usuarioIngresado) << endl;
+        cout << endl;
         cout << "0) Salir" << endl;
         cout << "1) Administrador de usuarios" << endl;
         cout << "2) Multiplicación de matrices cuadradas" << endl;
@@ -69,7 +74,8 @@ int main(int argc, char* argv[]) {
         cout << "6) Conteo sobre texto" << endl;
         cout << endl;
 
-        int opcionInt = solicitarOpcion();
+        int opcionInt = solicitarOpcion(u.perfil);
+        cout << endl;
 
         switch (opcionInt) {
             case 1:
@@ -152,17 +158,19 @@ void cargarUsuarios(vector<usuario>& usuarios, string archivoUsuarios) {
     cout << "(INFO) Los usuarios se cargaron en: " << duration.count() << " microsegundos" << endl;
 }
 
-bool autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string passwordIngresada) {
-    for (const usuario& u : usuarios) {
+int autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string passwordIngresada) {
+    for (int i = 0; i < usuarios.size(); i++) {
+        usuario u = usuarios[i];
+
         if (strcmp(u.username, usuarioIngresado.c_str()) == 0 && strcmp(u.password, passwordIngresada.c_str()) == 0) {
-            return true;
+            return i;
         }
     }
 
-    return false;
+    return -1;
 }
 
-int solicitarOpcion() {
+int solicitarOpcion(char* perfil) {
     string opcion = "0";
 
     while (true) {
@@ -170,6 +178,11 @@ int solicitarOpcion() {
         cin >> opcion;
 
         if (esEntero(opcion)) {
+            if (std::stoi(opcion) == 1 && strcmp(perfil, "GENERAL") == 0) {
+                cout << "(ERROR) Usted no tiene permisos para usar esta opción. Intente con otra." << endl;
+                continue;
+            }
+
             break;
         }
 

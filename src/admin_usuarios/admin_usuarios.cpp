@@ -47,6 +47,7 @@ int main(int argc, char* argv[]) {
         cout << endl;
 
         int opcionInt = solicitarOpcion();
+        cout << endl;
 
         switch (opcionInt) {
             case 1:
@@ -171,7 +172,6 @@ int solicitarOpcion() {
 }
 
 void crearUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
-    cout << endl;
     cout << "---= CREACIÓN DE USUARIO =---" << endl;
 
     usuario nuevoUsuario;
@@ -275,7 +275,6 @@ void crearUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
 }
 
 void listarUsuarios(const vector<usuario>& usuarios) {
-    cout << endl;
     cout << "---= LISTADO DE USUARIOS =---" << endl;
     cout << "ID | Nombre | Perfil" << endl;
 
@@ -299,7 +298,6 @@ void eliminarUsuario(vector<usuario>& usuarios, string archivoUsuarios) {
         return;
     }
 
-    cout << endl;
     cout << "---= ELIMINACIÓN DE USUARIO =---" << endl;
 
     string idUsuario = "";
