@@ -3,6 +3,7 @@
 #include "../include/util.h"
 #include "../include/conteo.h"
 #include "../include/calcula_funcion.h"
+#include "../include/palindrome.h"
 #include <cstring>
 #include <string>
 #include <cstring>
@@ -79,9 +80,7 @@ int main(int argc, char* argv[]) {
                 esperarTecla();
                 break;
             case 4:
-                // TODO: Llamar a método de palíndromo.
-                cout << "LLAMADA A MÉTODO PRINCIPAL DE PALINDROMO" << endl;
-                esperarTecla();
+                menuPalindromo();
                 break;
             case 5:
                 calcularFuncion();
