@@ -1,4 +1,4 @@
-# Administrador de usuarios
+# Sistema multipropósito
 
 ## Propósito de la aplicación
 Este es un sistema multipropósito el cual está diseñado para facilitar la gestión y control de usuarios
