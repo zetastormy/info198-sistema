@@ -53,7 +53,7 @@ Desde el directorio raíz del programa (donde está ubicado el archivo `.env`), 
 - **Multiplicador de matrices:**
 
   ```bash
-  ./bin/multi <ruta archivo matriz A> <ruta archivo matriz B> <separador>
+  ./bin/multi "<ruta archivo matriz A>" "<ruta archivo matriz B>" "<separador>"
   ```
 
 Este desplegará una interfaz de línea de comandos (CLI) que le permitirá trabajar con las distintas funciones ofrecidas
