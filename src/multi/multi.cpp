@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <fstream>
 
@@ -10,13 +11,17 @@ void multiplicacion(float* A, float* B, int m, int n, int k);
 
 int main(int argc, char **argv) {
 	if (argc != 4) {
-		cout << "(Error) Debe ejecutarse como ./bin/multi \"<ruta archivo matriz A>\" \"<ruta archivo matriz B>\" \"<separador>\"" << endl;
+		cout << "(ERROR) Debe ejecutarse como ./bin/multi \"<ruta archivo matriz A>\" \"<ruta archivo matriz B>\" \"<separador>\"" << endl;
 		exit(EXIT_FAILURE);
 	}
 
 	string rutaA = argv[1];
 	string rutaB = argv[2];
     char separador = argv[3][0];
+
+   	cout << "---= MULTIPLICADOR DE MATRICES AxB =---" << endl;
+    cout << "Separador: " << separador << endl;
+
     leeMatriz(rutaA, rutaB, separador);
 }
 
@@ -50,127 +55,156 @@ void multiplicacion(float* A, float* B, int m, int n, int k) {
 }
 
 void leeMatriz(const string& filepath,const string& second_filepath, char separador) {
-    ifstream file(filepath);
+    ifstream matrizA(filepath);
 
-    if (!file) {
-        cerr << "Could not open "<< filepath << " file" <<  endl;
+    if (!matrizA) {
+        cerr << "(ERROR) No se pudo abrir el archivo " << filepath << "." <<  endl;
         return;
     }
 
-    ifstream sec_file(second_filepath);
+    ifstream matrizB(second_filepath);
 
-    if (!sec_file) {
-        cerr << "Could not open "<< second_filepath << " file" <<  endl;
+    if (!matrizB) {
+        cerr << "(ERROR) No se pudo abrir el archivo " << second_filepath << "." <<  endl;
         return;
     }
 
-    string linea;
-    int numLineas = 0;
-    int maxCaracteres = 0;
+    string lineaA;
+    int numLineasA = 0;
+    int maxCaracteresA = 0;
 
-    while (std::getline(file, linea)) {
-        numLineas++;
-        int separadores = 0;
+    while (std::getline(matrizA, lineaA)) {
+        numLineasA++;
+        int separadoresA = 0;
 
-        for (char c : linea) {
-            if (c == separador) separadores++;
+        for (char c : lineaA) {
+            if (c == separador) separadoresA++;
         }
 
-        int elementos = separadores + 1;
+        int elementosA = separadoresA + 1;
 
-        if (maxCaracteres == 0) {
-            maxCaracteres = elementos;
+        if (maxCaracteresA == 0) {
+            maxCaracteresA = elementosA;
         }
 
-        if (elementos != maxCaracteres) {
-            cerr << "Matriz A de dimensiones incorrectas" << endl;
+        if (separadoresA == 0) {
+            cerr << "(ERROR) Matriz A, fila " << numLineasA << " no tiene el separador indicado." << endl;
+            return;
+        }
+
+        if (separadoresA + 1 < elementosA || elementosA != maxCaracteresA) {
+            cerr << "(ERROR) Matriz A, fila " << numLineasA << " tiene algún separador incorrecto o dimensiones incorrectas." << endl;
             return;
         }
     }
 
-    if (maxCaracteres != numLineas) {
-        cerr << "La matriz A no es NxN" << endl;
+    if (maxCaracteresA != numLineasA) {
+        cerr << "(ERROR) La matriz A no es NxN." << endl;
         return;
     }
 
-    int sec_numLineas = 0;
-    int sec_maxCaracteres = 0;
-    string sec_linea;
+    int numLineasB = 0;
+    int maxCaracteresB = 0;
+    string lineaB;
 
-    while (std::getline(sec_file, sec_linea)) {
-        sec_numLineas++;
+    while (std::getline(matrizB, lineaB)) {
+        numLineasB++;
         int separadoresB = 0;
-        for (char c : sec_linea) {
+        for (char c : lineaB) {
             if (c == separador) separadoresB++;
         }
 
         int elementosB = separadoresB + 1;
 
-        if (sec_maxCaracteres == 0){
-            sec_maxCaracteres = elementosB;
+        if (maxCaracteresB == 0){
+            maxCaracteresB = elementosB;
         }
 
-        if (elementosB != sec_maxCaracteres) {
-            cerr << "Matriz B de dimensiones incorrectas" << endl;
+
+        if (separadoresB == 0) {
+            cerr << "(ERROR) Matriz B, fila " << numLineasB << " no tiene el separador indicado." << endl;
+            return;
+        }
+
+        if (separadoresB + 1 < elementosB || elementosB != maxCaracteresB) {
+            cerr << "(ERROR) Matriz B, fila " << numLineasB << " tiene algún separador incorrecto o dimensiones incorrectas." << endl;
             return;
         }
     }
 
-    if (sec_maxCaracteres != sec_numLineas) {
-        cerr << "La matriz B no es NxN" << endl;
+    if (maxCaracteresB != numLineasB) {
+        cerr << "(ERROR) La matriz B no es NxN." << endl;
         return;
     }
 
-    if (numLineas != sec_numLineas) {
-        cerr << "Matrices de dimensiones distintas" << endl;
+    if (numLineasA != numLineasB) {
+        cerr << "(ERROR) Matrices de dimensiones distintas." << endl;
     }
 
-    //Cargar datos
-    float *A = new float[numLineas*maxCaracteres];
-    float *B = new float[sec_numLineas*sec_maxCaracteres];
+    float *A = new float[numLineasA*maxCaracteresA];
+    float *B = new float[numLineasB*maxCaracteresB];
 
-    file.clear();
-    file.seekg(0);
+    matrizA.clear();
+    matrizA.seekg(0);
+
+    int numLinea = 1;
     int idx = 0;
 
-    while (getline(file, linea)) {
+    while (getline(matrizA, lineaA)) {
         string numero;
 
-        for (size_t i = 0; i <= linea.size(); i++) {
-            if (i == linea.size() || linea[i] == separador) {
+        for (size_t i = 0; i <= lineaA.size(); i++) {
+            if (i == lineaA.size() || lineaA[i] == separador) {
                 if (!numero.empty()) {
-                    A[idx++] = stof(numero);
+                    try {
+                        A[idx++] = stof(numero);
+                    } catch (invalid_argument&) {
+                        cerr << "(ERROR) Matriz A, fila " << numLinea << " tiene un elemento que no es número." << endl;
+                        return;
+                    }
+
                     numero.clear();
                 }
             } else {
-                numero.push_back(linea[i]);
+                numero.push_back(lineaA[i]);
             }
         }
+
+        numLinea++;
     }
 
-    // ---- Volver a leer archivo B y cargar datos ----
-    sec_file.clear();
-    sec_file.seekg(0);
+    matrizB.clear();
+    matrizB.seekg(0);
+
+    numLinea = 1;
     idx = 0;
 
-    while (getline(sec_file, sec_linea)) {
+    while (getline(matrizB, lineaB)) {
         string numero;
 
-        for (size_t i = 0; i <= sec_linea.size(); i++) {
-            if (i == sec_linea.size() || sec_linea[i] == separador) {
+        for (size_t i = 0; i <= lineaB.size(); i++) {
+            if (i == lineaB.size() || lineaB[i] == separador) {
                 if (!numero.empty()) {
-                    B[idx++] = stof(numero);
+                    try {
+                        B[idx++] = stof(numero);
+                    } catch (invalid_argument&) {
+                        cerr << "(ERROR) Matriz B, fila " << numLinea << " tiene un elemento que no es número." << endl;
+                        return;
+                    }
+
                     numero.clear();
                 }
             } else {
-                numero.push_back(sec_linea[i]);
+                numero.push_back(lineaB[i]);
             }
         }
+
+        numLinea++;
     }
 
-    cout << "Matrices creadas correctamente" << endl;
+    cout << "Resultado:" << endl;
 
-    multiplicacion(A, B, numLineas, maxCaracteres, numLineas);
+    multiplicacion(A, B, numLineasA, maxCaracteresA, numLineasA);
     delete[] A;
     delete[] B;
 }

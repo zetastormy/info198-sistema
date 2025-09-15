@@ -87,6 +87,7 @@ int main(int argc, char* argv[]) {
                 break;
             case 6:
                 imprimirConteo(args::get(rutaArchivoIngresada));
+                esperarTecla();
                 break;
             case 0:
                 cout << endl;

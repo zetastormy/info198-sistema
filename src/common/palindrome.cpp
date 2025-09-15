@@ -45,7 +45,7 @@ void menuPalindromo(){
 
     switch(opcion){
         case 1:
-            if(esPalindromo(texto)) cout << "El texto SÍ es un palíndromo." << endl;
+            if (esPalindromo(texto)) cout << "El texto SÍ es un palíndromo." << endl;
             else cout << "El texto NO es un palíndromo." << endl;
             esperarTecla();
             break;

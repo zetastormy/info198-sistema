@@ -1,5 +1,4 @@
 #include "../include/conteo.h"
-#include "../include/util.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -67,6 +66,4 @@ void imprimirConteo(std::string archivoTexto){
     std::cout << "• " << conteo[1] <<" consonantes" <<std::endl;
     std::cout << "• " << conteo[2] <<" caracteres especiales" <<std::endl;
     std::cout << "• " << conteo[3] <<" palabras" <<std::endl;
-
-    esperarTecla();
 }
