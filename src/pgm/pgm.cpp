@@ -51,7 +51,7 @@ int main(int argc, char* argv[]) {
 
     while (true) {
         cout << endl;
-        cout << "---= SISTEMA DE USUARIOS =---" << endl;
+        cout << "---= PROGRAMA PRINCIPAL =---" << endl;
         cout << "Usuario: " << args::get(usuarioIngresado) << endl;
         cout << endl;
         cout << "0) Salir" << endl;

@@ -1,6 +1,5 @@
 #include "../include/util.h"
 #include "../include/dotenv.h"
-#include "../include/calcula_funcion.h"
 #include <algorithm>
 #include <cstring>
 #include <iostream>
@@ -32,7 +31,6 @@ int main(int argc, char* argv[]) {
         cout << "1) Crear usuario" << endl;
         cout << "2) Listar usuarios" << endl;
         cout << "3) Eliminar usuario" << endl;
-        cout << "5) Calcular función f(x) = x^2 + 2x + 8" << endl;
         cout << endl;
 
         int opcionInt = solicitarOpcion();
@@ -48,9 +46,6 @@ int main(int argc, char* argv[]) {
             case 3:
                 eliminarUsuario(usuarios, archivoUsuarios);
                 break;
-            case 5:
-                calcularFuncion();
-                break;  
             case 0:
                 cout << endl;
                 cout << "¡Hasta pronto!" << endl;
