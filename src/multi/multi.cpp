@@ -2,7 +2,8 @@
 #include <stdexcept>
 #include <string>
 #include <fstream>
-
+#include <sys/types.h>
+#include <unistd.h>
 using namespace std;
 
 void printMatriz(float* C, int m, int n);
@@ -19,7 +20,7 @@ int main(int argc, char **argv) {
 	string rutaB = argv[2];
     char separador = argv[3][0];
 
-   	cout << "---= MULTIPLICADOR DE MATRICES AxB =---" << endl;
+   	cout << "---= MULTIPLICADOR DE MATRICES AxB (PID: " << getpid() << ") =---" << endl;
     cout << "Separador: " << separador << endl;
 
     leeMatriz(rutaA, rutaB, separador);
