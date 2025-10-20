@@ -7,10 +7,16 @@
 #include <cstring>
 #include <string>
 #include <cstring>
+#include <sys/types.h>
+#include <unistd.h>
+#include <cstdlib>
+#include <filesystem>
 using namespace std;
 
 int autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string passwordIngresada);
 int solicitarOpcion(char* perfil);
+void conectarMultiplicaMatrices(string binarioMultMatrices);
+void conectarIndiceInvertido(string binarioIndiceInvertido);
 
 int main(int argc, char* argv[]) {
     args::ArgumentParser parser("Programa principal del sistema creado para INFO198.");
@@ -38,6 +44,9 @@ int main(int argc, char* argv[]) {
     dotenv env(".env");
     vector<usuario> usuarios;
     string archivoUsuarios = env.get("USER_FILE");
+    string binarioAdminUsuarios = env.get("ADMIN_SYS");
+    string binarioMultMatrices = env.get("MULTI_M");
+    string binarioIndiceInvertido = env.get("CREATE_INDEX");
 
     cargarUsuarios(usuarios, archivoUsuarios);
     int indiceUsuario = autenticarUsuario(usuarios, args::get(usuarioIngresado), args::get(passwordIngresada));
@@ -51,7 +60,7 @@ int main(int argc, char* argv[]) {
 
     while (true) {
         cout << endl;
-        cout << "---= PROGRAMA PRINCIPAL =---" << endl;
+        cout << "---= PROGRAMA PRINCIPAL (PID: " << getpid() << ") =---" << endl;
         cout << "Usuario: " << args::get(usuarioIngresado) << endl;
         cout << endl;
         cout << "0) Salir" << endl;
@@ -61,6 +70,7 @@ int main(int argc, char* argv[]) {
         cout << "4) ¿Es palíndromo?" << endl;
         cout << "5) Calcula f(x) = x² + 2x + 8" << endl;
         cout << "6) Conteo sobre texto" << endl;
+        cout << "7) Crea índice invertido" << endl;
         cout << endl;
 
         int opcionInt = solicitarOpcion(u.perfil);
@@ -68,12 +78,10 @@ int main(int argc, char* argv[]) {
 
         switch (opcionInt) {
             case 1:
-                cout << "(ERROR) Opción en construcción." << endl;
-                esperarTecla();
+                system(("./" + binarioAdminUsuarios).c_str());
                 break;
             case 2:
-                cout << "(ERROR) Opción en construcción." << endl;
-                esperarTecla();
+                conectarMultiplicaMatrices(binarioMultMatrices);
                 break;
             case 3:
                 cout << "(ERROR) Opción en construcción." << endl;
@@ -88,6 +96,9 @@ int main(int argc, char* argv[]) {
             case 6:
                 imprimirConteo(args::get(rutaArchivoIngresada));
                 esperarTecla();
+                break;
+            case 7:
+                conectarIndiceInvertido(binarioIndiceInvertido);
                 break;
             case 0:
                 cout << endl;
@@ -135,4 +146,112 @@ int solicitarOpcion(char* perfil) {
     }
 
     return std::stoi(opcion);
+}
+
+void conectarMultiplicaMatrices(string binarioMultMatrices) {
+    cout << "---= CONEXIÓN A PROGRAMA DE MULTIPLICACIÓN DE MATRICES =---" << endl;
+
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+    string rutaMatrizA;
+    while (true) {
+        cout << "Ingrese ruta a matriz A: ";
+        getline(cin, rutaMatrizA);
+
+        if (filesystem::exists(rutaMatrizA)) {
+            break;
+        }
+
+        cout << "(ERROR) No se pudo abrir el archivo en esa ruta. Intente nuevamente." << endl;
+    }
+
+    string rutaMatrizB;
+    while (true) {
+        cout << "Ingrese ruta a matriz B: ";
+        getline(cin, rutaMatrizB);
+
+        if (filesystem::exists(rutaMatrizB)) {
+            break;
+        }
+
+        cout << "(ERROR) No se pudo abrir el archivo en esa ruta. Intente nuevamente." << endl;
+    }
+
+    string separador;
+    cout << "Ingrese separador: ";
+    cin >> separador;
+
+    int opcion = 0;
+    cout << "\nOpciones:\n1) Ejecutar\n2) Cancelar\nSeleccione una opción: ";
+    cin >> opcion;
+
+    switch(opcion){
+        case 1:
+            cout << endl;
+            system(("./" + binarioMultMatrices + " \"" + rutaMatrizA + "\" \"" + rutaMatrizB + "\" \"" + separador + "\"").c_str());
+            esperarTecla();
+            break;
+        case 2:
+            cout << "Operación cancelada." << endl;
+            break;
+        default:
+            cout << "(ERROR) ¡Opción inválida!" << endl;
+            esperarTecla();
+    }
+}
+
+void conectarIndiceInvertido(string binarioIndiceInvertido) {
+    string nombreArchivo, rutaCarpeta;
+    int opcion;
+
+    cout << "---= CONEXIÓN A PROGRAMA DE CREACIÓN ÍNDICE INVERTIDO =---" << endl;
+
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    cout << "Ingrese nombre del archivo a crear: ";
+    getline(cin, nombreArchivo);
+    cout << "Ingrese la ruta de la carpeta donde tiene los libros: ";
+    getline(cin, rutaCarpeta);
+    cout << endl;
+
+    cout << "Opciones: " << endl;
+    cout << "1) Validar " << endl;
+    cout << "2) Cancelar "<< endl;
+    cout << "Seleccione una opción: ";
+    cin >> opcion;
+    cout << endl;
+
+    switch(opcion){
+        case 1: {
+            if (nombreArchivo.empty()) {
+                cout << "(ERROR) El nombre del archivo no puede estar vacío." << endl;
+                esperarTecla();
+                break;
+            }
+
+            if (rutaCarpeta.empty()) {
+                cout << "(ERROR) La ruta de libros no puede estar vacía." << endl;
+                esperarTecla();
+                break;
+            }
+
+            if (!filesystem::exists(rutaCarpeta)) {
+                cout << "(ERROR) La carpeta '" << rutaCarpeta << "' no existe." << endl;
+                esperarTecla();
+                break;
+            }
+
+            string rutaArchivo = "data/"+ nombreArchivo +".idx";
+
+            system(("./" + binarioIndiceInvertido + " " + nombreArchivo + " \"" + rutaCarpeta + "\"").c_str());
+            esperarTecla();
+            break;
+        }
+        case 2:
+            cout << "Operación cancelada." << endl;
+            break;
+        default:
+            cout << "(ERROR) ¡Opción inválida!" << endl;
+            esperarTecla();
+    }
 }
