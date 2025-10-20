@@ -13,6 +13,7 @@ usuarios almacenados.
 - Multiplicación de matrices.
 - Verificación de palíndromo.
 - Calcular función `f(x) = x^2 + 2x + 8` con parámetro personalizado.
+- Creador de índices invertidos.
 
 ## ¿Cómo usar la aplicación?
 
@@ -50,14 +51,19 @@ Desde el directorio raíz del programa (donde está ubicado el archivo `.env`), 
   ./bin/pgm -u <usuario> -p <contraseña> -f <ruta a texto a evaluar>
   ```
 
+  Este desplegará una interfaz de línea de comandos (CLI) que le permitirá trabajar con las distintas funciones ofrecidas por el sistema.
+
 - **Multiplicador de matrices:**
 
   ```bash
   ./bin/multi "<ruta archivo matriz A>" "<ruta archivo matriz B>" "<separador>"
   ```
 
-Este desplegará una interfaz de línea de comandos (CLI) que le permitirá trabajar con las distintas funciones ofrecidas
-por el sistema.
+- **Creador de índices invertidos:**
+
+  ```bash
+  ./bin/indice_invertido <nombre archivo> "<ruta directorio libros>"
+  ```
 
 ### Variables de entorno
 
@@ -66,3 +72,9 @@ El programa dispone de múltiples variables de entorno para facilitar la manipul
 - `USER_FILE`: que especifica el archivo donde se almacenan los usuarios. Por defecto, el valor de esta variable es `data/usuarios.txt` que creará un directorio llamado `data` si no existe.
 
 - `PROFILE_FILE`: que especifica el archivo donde se almacenan los perfiles y sus permisos respectivos. Este archivo se encuentra presente en el repositorio en `config/perfiles.txt`, si este no se encuentra presente, el programa principal no manejará permisos.
+
+- `ADMIN_SYS`: que especifica el lugar donde está alojado el binario al sistema  administrador de usuarios.
+
+- `MULTI_M`: que especifica el lugar donde está alojado el binario al sistema multiplicador de matrices.
+
+- `CREATE_INDEX`: que especifica el lugar donde está alojado el binario al sistema creador de índices invertidos.
