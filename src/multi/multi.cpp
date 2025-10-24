@@ -157,8 +157,16 @@ void leeMatriz(const string& filepath,const string& second_filepath, char separa
         for (size_t i = 0; i <= lineaA.size(); i++) {
             if (i == lineaA.size() || lineaA[i] == separador) {
                 if (!numero.empty()) {
+                    size_t posFinalConv = 0;
+
                     try {
-                        A[idx++] = stof(numero);
+                        float resultadoConv = stof(numero, &posFinalConv);
+
+                        if (posFinalConv != numero.size()) {
+                            throw invalid_argument("Conversión incompleta. El string contiene caracteres no numéricos.");
+                        }
+
+                        A[idx++] = resultadoConv;
                     } catch (invalid_argument&) {
                         cerr << "(ERROR) Matriz A, fila " << numLinea << " tiene un elemento que no es número." << endl;
                         return;
@@ -186,8 +194,16 @@ void leeMatriz(const string& filepath,const string& second_filepath, char separa
         for (size_t i = 0; i <= lineaB.size(); i++) {
             if (i == lineaB.size() || lineaB[i] == separador) {
                 if (!numero.empty()) {
+                    size_t posFinalConv = 0;
+
                     try {
-                        B[idx++] = stof(numero);
+                        float resultadoConv = stof(numero, &posFinalConv);
+
+                        if (posFinalConv != numero.size()) {
+                            throw invalid_argument("Conversión incompleta. El string contiene caracteres no numéricos.");
+                        }
+
+                        B[idx++] = resultadoConv;
                     } catch (invalid_argument&) {
                         cerr << "(ERROR) Matriz B, fila " << numLinea << " tiene un elemento que no es número." << endl;
                         return;
