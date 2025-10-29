@@ -7,6 +7,7 @@
 #include <chrono>
 #include <sys/types.h>
 #include <unistd.h>
+
 using namespace std;
 using namespace std::chrono;
 
@@ -83,7 +84,12 @@ bool crearIndiceInvertido(string nombreIndice, string rutaLibros) {
                     }
                 }
 
-                palabraContador[palabraNormalizada][rutaLibro.path().filename().replace_extension()]++;
+                string nombreArchivoLibro = rutaLibro.path().filename().replace_extension();
+
+                cout << "Leyendo libro: " << nombreArchivoLibro << "\r";
+                cout << flush;
+
+                palabraContador[palabraNormalizada][nombreArchivoLibro]++;
             }
         }
 
