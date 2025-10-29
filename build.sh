@@ -1,10 +1,20 @@
 #!/bin/bash
-dir_progs=( "src/admin_usuarios" "src/pgm" "src/multi" "src/indice_invertido" )
+makefile_progs=( "src/admin_usuarios" "src/pgm" "src/multi" "src/indice_invertido" )
+cmake_progs=( "src/juego" )
 
-for dir_prog in "${dir_progs[@]}"
+for makefile_prog in "${makefile_progs[@]}"
 do
-    echo "---= COMPILANDO $dir_prog =---"
-    make -C $dir_prog
+    echo "---= COMPILANDO $makefile_prog =---"
+    make -C $makefile_prog
+    echo ""
+done
+
+for cmake_prog in "${cmake_progs[@]}"
+do
+    echo "---= COMPILANDO $cmake_prog =---"
+    mkdir -p build
+    cmake -S $cmake_prog -B build
+    cmake --build build
     echo ""
 done
 

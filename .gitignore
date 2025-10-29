@@ -56,3 +56,6 @@ bin/
 
 # Ignore `data` dir
 data/
+
+# Ignore `build` dir
+build/

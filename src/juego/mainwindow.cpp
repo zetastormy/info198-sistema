@@ -1,0 +1,274 @@
+#include "../include/mainwindow.h"
+#include "ui_mainwindow.h"
+#include <QDebug>
+#include "../include/dotenv.h"
+
+MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), m_server(nullptr) {
+    ui->setupUi(this);
+
+    ui->stackedWidget->setCurrentIndex(0);
+
+    m_socket = new QTcpSocket(this);
+
+    connect(m_socket, &QTcpSocket::connected, this, &MainWindow::onSocketConnected);
+    connect(m_socket, &QTcpSocket::readyRead, this, &MainWindow::onSocketReadyRead);
+    connect(m_socket, &QTcpSocket::disconnected, this, &MainWindow::onSocketDisconnected);
+
+    connect(ui->hostButton, &QPushButton::clicked, this, &MainWindow::on_hostButton_clicked);
+    connect(ui->joinButton, &QPushButton::clicked, this, &MainWindow::on_joinButton_clicked);
+
+    connect(ui->lobbyButton, &QPushButton::clicked, this, &MainWindow::on_lobbyButton_clicked);
+}
+
+MainWindow::~MainWindow() {
+    delete ui;
+
+    if (m_server) {
+        delete m_server;
+    }
+}
+
+void MainWindow::on_hostButton_clicked() {
+    m_playerName = ui->nameInput->text();
+
+    if (m_playerName.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Debes ingresar un Nombre.");
+        return;
+    }
+
+    QString path = QCoreApplication::applicationDirPath() + "/.env";
+    dotenv env(path.toStdString());
+
+    qDebug() << "Iniciando modo Host...";
+    m_server = new Server(this);
+    m_server->startServer();
+
+    m_socket->connectToHost(QHostAddress("127.0.0.1"), 8080);
+
+    ui->hostButton->setEnabled(false);
+    ui->joinButton->setEnabled(false);
+}
+
+void MainWindow::on_joinButton_clicked() {
+    m_playerName = ui->nameInput->text();
+    QString ip = ui->ipInput->text();
+
+    if (ip.isEmpty() || m_playerName.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Debes ingresar una IP y un Nombre.");
+        return;
+    }
+
+    qDebug() << "Iniciando modo Cliente, conectando a" << ip;
+
+    m_socket->connectToHost(QHostAddress(ip), 8080);
+
+    ui->hostButton->setEnabled(false);
+    ui->joinButton->setEnabled(false);
+}
+
+void MainWindow::on_addPlayerButton_clicked() {
+    QString teamName = ui->teamNameInput->text();
+    if (teamName.isEmpty()) return;
+
+    QString message = "JOIN_TEAM:" + teamName + "\n";
+    m_socket->write(message.toUtf8());
+
+    ui->teamNameInput->clear();
+}
+
+void MainWindow::on_startGameButton_clicked() {
+    m_socket->write("START_GAME\n");
+
+    ui->startGameButton->setEnabled(false);
+}
+
+void MainWindow::on_nextTurnButton_clicked() {
+    m_socket->write("NEXT_TURN\n");
+}
+
+void MainWindow::on_lobbyButton_clicked() {
+    if (ui->startGameButton->isVisible()) {
+        ui->startGameButton->setEnabled(true);
+    }
+
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+void MainWindow::onSocketConnected() {
+    qDebug() << "Cliente: Conectado al servidor.";
+    ui->hostButton->setEnabled(true);
+    ui->joinButton->setEnabled(true);
+
+    QString message = "CONNECT:" + m_playerName + "\n";
+    m_socket->write(message.toUtf8());
+    this->setWindowTitle("JuegoSO - " + m_playerName);
+    ui->stackedWidget->setCurrentIndex(1);
+}
+
+void MainWindow::onSocketDisconnected() {
+    qDebug() << "Cliente: Desconectado del servidor.";
+    QMessageBox::critical(this, "Desconectado", "Se perdió la conexión con el servidor.");
+
+    ui->hostButton->setEnabled(true);
+    ui->joinButton->setEnabled(true);
+
+    if (m_server) {
+        qDebug() << "Cerrando el servidor local.";
+        delete m_server;
+        m_server = nullptr;
+    }
+
+    ui->stackedWidget->setCurrentIndex(0);
+}
+
+void MainWindow::clearGameWidgets() {
+    for (QLabel* label : m_teamLabels) {
+        delete label;
+    }
+
+    m_teamLabels.clear();
+
+    for (QProgressBar* bar : m_teamProgressBars) {
+        delete bar;
+    }
+
+    m_teamProgressBars.clear();
+}
+
+void MainWindow::onSocketReadyRead() {
+    QByteArray data = m_socket->readAll();
+    QStringList messages = QString(data).trimmed().split('\n', Qt::SkipEmptyParts);
+
+    for (const QString& message : messages) {
+        qDebug() << "Cliente: Mensaje recibido:" << message;
+
+        if (message.startsWith("CONNECT_OK:")) {
+            QString role = message.section(':', 1);
+            if (role == "ADMIN") {
+                ui->startGameButton->setVisible(true);
+            } else {
+                ui->startGameButton->setVisible(false);
+            }
+        } else if (message.startsWith("LOBBY_UPDATE:")) {
+            QString data = message.section(':', 1);
+            ui->lobbyDisplay->clear();
+            ui->lobbyDisplay->append("--- Estado del Lobby ---");
+
+            QStringList teams = data.split(';', Qt::SkipEmptyParts);
+            for (const QString& team : teams) {
+                QStringList parts = team.split(':');
+                if (parts.length() < 2) continue;
+
+                QString teamName = parts[0];
+                QString players = parts[1];
+
+                ui->lobbyDisplay->append("Equipo [" + teamName + "]: " + players.replace(",", ", "));
+            }
+        } else if (message.startsWith("ERROR:")) {
+            QString errorMsg = message.section(':', 1);
+            QMessageBox::warning(this, "Error del Servidor", errorMsg);
+
+            if (ui->startGameButton->isVisible()) {
+                ui->startGameButton->setEnabled(true);
+            }
+        } else if (message.startsWith("JUEGO_INICIADO:")) {
+            qDebug() << "[DEBUG] Entrando a JUEGO_INICIADO...";
+
+            clearGameWidgets();
+            qDebug() << "[DEBUG] 1. clearGameWidgets() OK.";
+
+            ui->logDisplay->clear();
+            qDebug() << "[DEBUG] 2. logDisplay->clear() OK. (¡Significa que ui->logDisplay NO es nulo!)";
+
+            ui->logDisplay->append("¡El juego ha comenzado!");
+            qDebug() << "[DEBUG] 3. logDisplay->append() OK.";
+
+            QString teamData = message.section(':', 1);
+            QStringList teams = teamData.split(';', Qt::SkipEmptyParts);
+            qDebug() << "[DEBUG] 4. Lista de equipos procesada:" << teams;
+
+            for (const QString& teamName : teams) {
+                qDebug() << "[DEBUG] 5. Creando widgets para equipo:" << teamName;
+                QLabel* nameLabel = new QLabel(teamName);
+                nameLabel->setStyleSheet("font-weight: bold; font-size: 14px;");
+
+                QProgressBar* bar = new QProgressBar();
+
+                ui->gameLayout->addWidget(nameLabel);
+                qDebug() << "[DEBUG] 6. nameLabel añadido a gameLayout OK.";
+
+                ui->gameLayout->addWidget(bar);
+                qDebug() << "[DEBUG] 7. bar añadido a gameLayout OK.";
+
+                m_teamLabels.push_back(nameLabel);
+                m_teamProgressBars.push_back(bar);
+            }
+
+            qDebug() << "[DEBUG] 8. Bucle de creación de widgets finalizado.";
+
+            ui->stackedWidget->setCurrentIndex(2);
+            qDebug() << "[DEBUG] 9. ¡¡CAMBIO DE PÁGINA REALIZADO!!";
+        } else if (message.startsWith("GAME_UPDATE:")) {
+            QStringList parts = message.section(':', 1).split(';', Qt::SkipEmptyParts);
+            int winGoal = 20;
+
+            if (!parts.isEmpty() && parts.last().startsWith("Goal:")) {
+                winGoal = parts.last().section(':', 1).toInt();
+                parts.removeLast();
+            }
+
+            for (const QString& teamData : parts) {
+                QString teamName = teamData.section(':', 0, 0);
+                int score = teamData.section(':', 1, 1).toInt();
+
+                for (size_t i = 0; i < m_teamLabels.size(); ++i) {
+                    if (m_teamLabels[i]->text() == teamName && i < m_teamProgressBars.size()) {
+                        m_teamProgressBars[i]->setMaximum(winGoal);
+                        m_teamProgressBars[i]->setValue(score);
+                        QString text = (teamName + " (%1/%2)").arg(score).arg(winGoal);
+                        m_teamProgressBars[i]->setFormat(text);
+                        break;
+                    }
+                }
+            }
+        } else if (message.startsWith("LOG:")) {
+            QString logMsg = message.section(':', 1);
+
+            logMsg.replace("|", "\n");
+
+            ui->logDisplay->append(logMsg);
+        } else if (message.startsWith("GAME_OVER:")) {
+            QString winner = message.section(':', 1);
+
+            ui->winnerLabel->setText("¡El equipo '" + winner + "' ha ganado!");
+            ui->stackedWidget->setCurrentIndex(3);
+        } else if (message.startsWith("TURN:")) {
+            QString currentPlayer = message.section(':', 1, 1);
+            QString nextPlayer = message.section(':', 2, 2);
+
+            if (currentPlayer == m_playerName) {
+                ui->nextTurnButton->setEnabled(true);
+                ui->turnStatusLabel->setText("¡ES TU TURNO!");
+                ui->turnStatusLabel->setStyleSheet("background-color: #4CAF50; color: white; padding: 5px; font-weight: bold; border-radius: 5px;");
+
+            } else if (nextPlayer == m_playerName) {
+                ui->nextTurnButton->setEnabled(false);
+                ui->turnStatusLabel->setText("¡TE TOCA DESPUÉS! (Turno de: " + currentPlayer + ")");
+                ui->turnStatusLabel->setStyleSheet("background-color: #FFC107; color: black; padding: 5px; font-weight: bold; border-radius: 5px;");
+
+            } else {
+                ui->nextTurnButton->setEnabled(false);
+                ui->turnStatusLabel->setText("Turno de: " + currentPlayer);
+                ui->turnStatusLabel->setStyleSheet("background-color: #F44336; color: white; padding: 5px; border-radius: 5px;");
+            }
+        } else if (message.startsWith("GAME_OVER:")) {
+            QString winner = message.section(':', 1);
+
+            ui->winnerLabel->setText("¡El equipo '" + winner + "' ha ganado!");
+
+            ui->nextTurnButton->setEnabled(false);
+
+            ui->stackedWidget->setCurrentIndex(3);
+        }
+    }
+}
