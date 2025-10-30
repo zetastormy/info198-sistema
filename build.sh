@@ -1,5 +1,5 @@
 #!/bin/bash
-dir_progs=( "src/admin_usuarios" "src/pgm" "src/multi" "src/indice_invertido" )
+dir_progs=( "src/admin_usuarios" "src/pgm" "src/multi" "src/indice_invertido" "src/indice_invertido_paralelo")
 
 for dir_prog in "${dir_progs[@]}"
 do

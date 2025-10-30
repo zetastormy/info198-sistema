@@ -63,8 +63,8 @@ bool crearIndiceInvertido(string nombreIndice, string rutaLibros) {
         return false;
     }
 
-    unordered_map<string, unordered_map<string, int>> palabraContador;
-
+    unordered_map<string, unordered_map<int, int>> palabraContador;
+    int contadorL = 1;
     for (const auto& rutaLibro : filesystem::directory_iterator(rutaLibros)) {
         ifstream libro(rutaLibro.path());
 
@@ -89,11 +89,12 @@ bool crearIndiceInvertido(string nombreIndice, string rutaLibros) {
                 cout << "Leyendo libro: " << nombreArchivoLibro << "\r";
                 cout << flush;
 
-                palabraContador[palabraNormalizada][nombreArchivoLibro]++;
+                palabraContador[palabraNormalizada][contadorL]++;
             }
         }
 
         libro.close();
+        contadorL++;
     }
 
     for (const auto& palabra : palabraContador) {
