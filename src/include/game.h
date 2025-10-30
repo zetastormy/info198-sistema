@@ -2,11 +2,8 @@
 #include "game_entities.h"
 #include <vector>
 #include <string>
-#include <sstream>
-#include <cstdlib>
 
 class Game {
-    int boardSize;
     int winThreshold;
     Dice dice;
     std::vector<Team> teams;

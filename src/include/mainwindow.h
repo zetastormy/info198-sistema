@@ -1,13 +1,11 @@
-// mainwindow.h
 #pragma once
 
 #include <QMainWindow>
-#include <QTcpSocket>     // Para el socket
-#include <QHostAddress>   // Para la IP
-#include <QMessageBox>    // Para mostrar errores
-#include <vector>            // <-- AÑADIR
-#include <QProgressBar>      // <-- AÑADIR
-#include <QLabel>            // <-- AÑADIR
+#include <QTcpSocket>
+#include <QHostAddress>
+#include <QMessageBox>
+#include <QProgressBar>
+#include <QLabel>
 #include "server.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -21,12 +19,12 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    // Slots para los botones (generados por Qt)
 private slots:
     void on_addPlayerButton_clicked();
     void on_startGameButton_clicked();
     void on_nextTurnButton_clicked();
     void on_lobbyButton_clicked();
+    void on_exitButton_ConnectionPage_clicked();
 
     void on_hostButton_clicked();
     void on_joinButton_clicked();
@@ -35,13 +33,18 @@ private slots:
     void onSocketConnected();
     void onSocketReadyRead();
     void onSocketDisconnected();
+    void onSocketError(QAbstractSocket::SocketError socketError);
+    void onConnectionTimeout();
 
 private:
     Ui::MainWindow *ui;
-    QTcpSocket* m_socket;     // El "cable" al servidor
-    QString m_playerName;     // El nombre de este jugador
-    std::vector<QLabel*> m_teamLabels;
-    std::vector<QProgressBar*> m_teamProgressBars;
+    QTcpSocket* m_socket;
+    QString m_playerName;
+    QTimer *m_connectionTimer;
+    bool m_isAdmin = false;
+
+    QList<QLabel*> m_teamLabels;
+    QList<QProgressBar*> m_teamProgressBars;
     Server* m_server;
     void clearGameWidgets();
 };

@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include <QDebug>
 #include "../include/dotenv.h"
+#include <QHostAddress>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), m_server(nullptr) {
     ui->setupUi(this);
@@ -10,39 +12,38 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     m_socket = new QTcpSocket(this);
 
+    m_connectionTimer = new QTimer(this);
+    m_connectionTimer->setSingleShot(true);
+    connect(m_connectionTimer, &QTimer::timeout, this, &MainWindow::onConnectionTimeout);
+
     connect(m_socket, &QTcpSocket::connected, this, &MainWindow::onSocketConnected);
     connect(m_socket, &QTcpSocket::readyRead, this, &MainWindow::onSocketReadyRead);
     connect(m_socket, &QTcpSocket::disconnected, this, &MainWindow::onSocketDisconnected);
+    connect(m_socket, &QTcpSocket::errorOccurred, this, &MainWindow::onSocketError);
 
-    connect(ui->hostButton, &QPushButton::clicked, this, &MainWindow::on_hostButton_clicked);
-    connect(ui->joinButton, &QPushButton::clicked, this, &MainWindow::on_joinButton_clicked);
-
-    connect(ui->lobbyButton, &QPushButton::clicked, this, &MainWindow::on_lobbyButton_clicked);
 }
 
 MainWindow::~MainWindow() {
     delete ui;
-
-    if (m_server) {
-        delete m_server;
-    }
 }
 
 void MainWindow::on_hostButton_clicked() {
     m_playerName = ui->nameInput->text();
 
     if (m_playerName.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Debes ingresar un Nombre.");
+        QMessageBox::warning(this, "Error", "Debes ingresar un nombre.");
         return;
     }
 
-    QString path = QCoreApplication::applicationDirPath() + "/.env";
+    QString path = QCoreApplication::applicationDirPath() + "/../.env";
     dotenv env(path.toStdString());
 
-    qDebug() << "Iniciando modo Host...";
+    qDebug() << "Iniciando modo host...";
     m_server = new Server(this);
     m_server->startServer();
 
+    ui->statusbar->showMessage("Creando partida (conectando a 127.0.0.1)...");
+    m_connectionTimer->start(10000); // 10 segundos de tiempo límite
     m_socket->connectToHost(QHostAddress("127.0.0.1"), 8080);
 
     ui->hostButton->setEnabled(false);
@@ -54,12 +55,14 @@ void MainWindow::on_joinButton_clicked() {
     QString ip = ui->ipInput->text();
 
     if (ip.isEmpty() || m_playerName.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Debes ingresar una IP y un Nombre.");
+        QMessageBox::warning(this, "Error", "Debes ingresar una IP y un nombre.");
         return;
     }
 
-    qDebug() << "Iniciando modo Cliente, conectando a" << ip;
+    qDebug() << "Iniciando modo cliente, conectando a" << ip;
 
+    ui->statusbar->showMessage("Conectando a " + ip + "...");
+    m_connectionTimer->start(10000); // 10 segundos de tiempo límite
     m_socket->connectToHost(QHostAddress(ip), 8080);
 
     ui->hostButton->setEnabled(false);
@@ -87,28 +90,35 @@ void MainWindow::on_nextTurnButton_clicked() {
 }
 
 void MainWindow::on_lobbyButton_clicked() {
-    if (ui->startGameButton->isVisible()) {
-        ui->startGameButton->setEnabled(true);
-    }
-
     ui->stackedWidget->setCurrentIndex(1);
+}
+
+void MainWindow::on_exitButton_ConnectionPage_clicked() {
+    qDebug() << "Botón Salir (Inicio) presionado. Cerrando la aplicación.";
+    this->close();
 }
 
 void MainWindow::onSocketConnected() {
     qDebug() << "Cliente: Conectado al servidor.";
-    ui->hostButton->setEnabled(true);
-    ui->joinButton->setEnabled(true);
+
+    m_connectionTimer->stop();
+    ui->statusbar->clearMessage();
 
     QString message = "CONNECT:" + m_playerName + "\n";
     m_socket->write(message.toUtf8());
-    this->setWindowTitle("JuegoSO - " + m_playerName);
+    this->setWindowTitle("Juego - " + m_playerName);
     ui->stackedWidget->setCurrentIndex(1);
 }
 
 void MainWindow::onSocketDisconnected() {
     qDebug() << "Cliente: Desconectado del servidor.";
-    QMessageBox::critical(this, "Desconectado", "Se perdió la conexión con el servidor.");
 
+    if (ui->stackedWidget->currentIndex() != 0) {
+         QMessageBox::critical(this, "Desconectado", "Se perdió la conexión con el servidor.");
+    }
+
+    m_connectionTimer->stop();
+    ui->statusbar->clearMessage();
     ui->hostButton->setEnabled(true);
     ui->joinButton->setEnabled(true);
 
@@ -118,7 +128,36 @@ void MainWindow::onSocketDisconnected() {
         m_server = nullptr;
     }
 
+    m_isAdmin = false;
     ui->stackedWidget->setCurrentIndex(0);
+}
+
+void MainWindow::onConnectionTimeout() {
+    qDebug() << "¡Timeout de conexión!";
+
+    m_socket->abort();
+
+    QMessageBox::warning(this, "Error de Conexión",
+                         "No se pudo conectar al servidor (tiempo de espera de 10s agotado). "
+                         "Verifica la IP o que el servidor esté activo.");
+
+    ui->statusbar->clearMessage();
+    ui->hostButton->setEnabled(true);
+    ui->joinButton->setEnabled(true);
+}
+
+void MainWindow::onSocketError(QAbstractSocket::SocketError socketError) {
+    if (m_connectionTimer->isActive()) {
+        qDebug() << "Error de socket durante la conexión:" << m_socket->errorString();
+
+        m_connectionTimer->stop();
+
+        QMessageBox::critical(this, "Error de Conexión", m_socket->errorString());
+
+        ui->statusbar->clearMessage();
+        ui->hostButton->setEnabled(true);
+        ui->joinButton->setEnabled(true);
+    }
 }
 
 void MainWindow::clearGameWidgets() {
@@ -144,7 +183,10 @@ void MainWindow::onSocketReadyRead() {
 
         if (message.startsWith("CONNECT_OK:")) {
             QString role = message.section(':', 1);
-            if (role == "ADMIN") {
+
+            m_isAdmin = (role == "ADMIN");
+
+            if (m_isAdmin) {
                 ui->startGameButton->setVisible(true);
             } else {
                 ui->startGameButton->setVisible(false);
@@ -155,14 +197,40 @@ void MainWindow::onSocketReadyRead() {
             ui->lobbyDisplay->append("--- Estado del Lobby ---");
 
             QStringList teams = data.split(';', Qt::SkipEmptyParts);
+
+            int teamCount = teams.size();
+            bool canStart = true;
+
+            if (teamCount < 2) {
+                canStart = false;
+            }
+
             for (const QString& team : teams) {
                 QStringList parts = team.split(':');
-                if (parts.length() < 2) continue;
-
                 QString teamName = parts[0];
-                QString players = parts[1];
+                QString players;
+                QStringList playerList;
+
+                if (parts.length() >= 2) {
+                    players = parts[1];
+                    playerList = players.split(',', Qt::SkipEmptyParts);
+                }
+
+                if (playerList.count() < 2) {
+                    canStart = false;
+                }
 
                 ui->lobbyDisplay->append("Equipo [" + teamName + "]: " + players.replace(",", ", "));
+            }
+
+            if (m_isAdmin) {
+                if (canStart) {
+                    ui->startGameButton->setEnabled(true);
+                    qDebug() << "Condiciones de inicio CUMPLIDAS (>=2 equipos, >=2 jugadores/equipo). Botón habilitado.";
+                } else {
+                    ui->startGameButton->setEnabled(false);
+                    qDebug() << "Condiciones de inicio NO CUMPLIDAS. Botón deshabilitado.";
+                }
             }
         } else if (message.startsWith("ERROR:")) {
             QString errorMsg = message.section(':', 1);
@@ -212,7 +280,7 @@ void MainWindow::onSocketReadyRead() {
             QStringList parts = message.section(':', 1).split(';', Qt::SkipEmptyParts);
             int winGoal = 20;
 
-            if (!parts.isEmpty() && parts.last().startsWith("Goal:")) {
+            if (!parts.isEmpty() && parts.last().startsWith("Objetivo:")) {
                 winGoal = parts.last().section(':', 1).toInt();
                 parts.removeLast();
             }

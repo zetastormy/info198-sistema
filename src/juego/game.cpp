@@ -1,12 +1,13 @@
 #include "../include/game.h"
 #include <iostream>
+#include <random>
+#include <sstream>
+#include <QDebug>
 
 Game::Game() : dice(6), started(false), currentTeam(0),winnerName("") {
-    const char* envBoard = std::getenv("BOARD_SIZE");
     const char* envWin = std::getenv("WIN_THRESHOLD");
 
-    boardSize = envBoard ? std::atoi(envBoard) : 20;
-    winThreshold = envWin ? std::atoi(envWin) : boardSize;
+    winThreshold = envWin ? std::atoi(envWin) : 20;
 }
 
 void Game::addTeam(const Team& team) {
@@ -22,7 +23,7 @@ std::string Game::getWinnerName() const {
 bool Game::canStart() const {
     if (teams.size() < 2) return false;
     for (const auto& t : teams)
-        if (t.members.size() < 2) // Requisito de min 2 jugadores
+        if (t.members.size() < 2)
             return false;
     return true;
 }
@@ -37,6 +38,15 @@ std::string Game::start() {
         return "ERROR: No se cumplen las condiciones para iniciar (min 2 equipos, min 2 jugadores/equipo).\n";
     }
     started = true;
+
+    if (!teams.empty()) {
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_int_distribution<> dis(0, teams.size() - 1);
+        currentTeam = dis(gen);
+        qDebug() << "[DEBUG] Equipo inicial aleatorio elegido:" << currentTeam;
+    }
+
     std::string msg = "¡Juego iniciado con " + std::to_string(teams.size()) + " equipos!\n";
     return msg;
 }
