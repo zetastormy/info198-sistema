@@ -17,6 +17,8 @@ int autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string
 int solicitarOpcion(char* perfil);
 void conectarMultiplicaMatrices(string binarioMultMatrices);
 void conectarIndiceInvertido(string binarioIndiceInvertido);
+void conectarIndiceInvertidoParalelo(string binarioIndiceInvertido);
+
 
 int main(int argc, char* argv[]) {
     args::ArgumentParser parser("Programa principal del sistema creado para INFO198.");
@@ -47,6 +49,7 @@ int main(int argc, char* argv[]) {
     string binarioAdminUsuarios = env.get("ADMIN_SYS");
     string binarioMultMatrices = env.get("MULTI_M");
     string binarioIndiceInvertido = env.get("CREATE_INDEX");
+    string binIndiceInvertidoParalelo = env.get("INDICE_INVET_PARALELO");
 
     cargarUsuarios(usuarios, archivoUsuarios);
     int indiceUsuario = autenticarUsuario(usuarios, args::get(usuarioIngresado), args::get(passwordIngresada));
@@ -71,6 +74,7 @@ int main(int argc, char* argv[]) {
         cout << "5) Calcula f(x) = x² + 2x + 8" << endl;
         cout << "6) Conteo sobre texto" << endl;
         cout << "7) Crea índice invertido" << endl;
+        cout << "8) Crea índice invertido en paralelo"<<endl;
         cout << endl;
 
         int opcionInt = solicitarOpcion(u.perfil);
@@ -100,6 +104,9 @@ int main(int argc, char* argv[]) {
             case 7:
                 conectarIndiceInvertido(binarioIndiceInvertido);
                 break;
+            case 8:
+                conectarIndiceInvertidoParalelo(binIndiceInvertidoParalelo);
+                break;
             case 0:
                 cout << endl;
                 cout << "¡Hasta pronto!" << endl;
@@ -122,7 +129,6 @@ int autenticarUsuario(vector<usuario>& usuarios, string usuarioIngresado, string
             return i;
         }
     }
-
     return -1;
 }
 
@@ -244,6 +250,62 @@ void conectarIndiceInvertido(string binarioIndiceInvertido) {
             string rutaArchivo = "data/"+ nombreArchivo +".idx";
 
             system(("./" + binarioIndiceInvertido + " " + nombreArchivo + " \"" + rutaCarpeta + "\"").c_str());
+            esperarTecla();
+            break;
+        }
+        case 2:
+            cout << "Operación cancelada." << endl;
+            break;
+        default:
+            cout << "(ERROR) ¡Opción inválida!" << endl;
+            esperarTecla();
+    }
+}
+
+void conectarIndiceInvertidoParalelo(string binIndiceInvertidoParalelo) {
+    string nombreArchivo, rutaCarpeta;
+    int opcion;
+
+    cout << "---= CONEXIÓN A PROGRAMA DE CREACIÓN ÍNDICE INVERTIDO =---" << endl;
+
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    cout << "Ingrese nombre del archivo a crear: ";
+    getline(cin, nombreArchivo);
+    cout << "Ingrese la ruta de la carpeta donde tiene los libros: ";
+    getline(cin, rutaCarpeta);
+    cout << endl;
+
+    cout << "Opciones: " << endl;
+    cout << "1) Validar " << endl;
+    cout << "2) Cancelar "<< endl;
+    cout << "Seleccione una opción: ";
+    cin >> opcion;
+    cout << endl;
+
+    switch(opcion){
+        case 1: {
+            if (nombreArchivo.empty()) {
+                cout << "(ERROR) El nombre del archivo no puede estar vacío." << endl;
+                esperarTecla();
+                break;
+            }
+
+            if (rutaCarpeta.empty()) {
+                cout << "(ERROR) La ruta de libros no puede estar vacía." << endl;
+                esperarTecla();
+                break;
+            }
+
+            if (!filesystem::exists(rutaCarpeta)) {
+                cout << "(ERROR) La carpeta '" << rutaCarpeta << "' no existe." << endl;
+                esperarTecla();
+                break;
+            }
+
+            string rutaArchivo = "data/"+ nombreArchivo +".idx";
+
+            system(("./" + binIndiceInvertidoParalelo + " " + nombreArchivo + " \"" + rutaCarpeta + "\"").c_str());
             esperarTecla();
             break;
         }
