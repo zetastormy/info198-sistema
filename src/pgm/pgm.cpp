@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
     string binarioMultMatrices = env.get("MULTI_M");
     string binarioIndiceInvertido = env.get("CREATE_INDEX");
     string binIndiceInvertidoParalelo = env.get("INDICE_INVET_PARALELO");
+    string binJuego = env.get("GAME");
 
     cargarUsuarios(usuarios, archivoUsuarios);
     int indiceUsuario = autenticarUsuario(usuarios, args::get(usuarioIngresado), args::get(passwordIngresada));
@@ -88,7 +89,7 @@ int main(int argc, char* argv[]) {
                 conectarMultiplicaMatrices(binarioMultMatrices);
                 break;
             case 3:
-                cout << "(ERROR) Opción en construcción." << endl;
+                system(("./" + binJuego).c_str());
                 esperarTecla();
                 break;
             case 4:
