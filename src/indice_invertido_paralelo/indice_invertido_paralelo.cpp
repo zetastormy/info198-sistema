@@ -112,9 +112,8 @@ void crearIndiceParalelo(const string &rutaLibros, const string &nombreIndice, i
                     continue;
                 }
 
-                // 🔹 Log: inicio del procesamiento
                 log registro;
-                registro.idThread = hash<thread::id>{}(this_thread::get_id()); // convierte el id del hilo a un entero
+                registro.idThread = hash<thread::id>{}(this_thread::get_id());
                 registro.idLibro = i;
                 registro.inicio = time(nullptr);
 
@@ -137,18 +136,15 @@ void crearIndiceParalelo(const string &rutaLibros, const string &nombreIndice, i
                     }
                 }
 
-                // 🔹 Log: término del procesamiento
                 registro.cantPalabras = contadorPalabras;
                 registro.fin = time(nullptr);
 
-                // 🔹 Guardar log (usa tu función)
                 {
-                    lock_guard<mutex> lock(mtxIndice); // proteger escritura de logs
+                    lock_guard<mutex> lock(mtxIndice);
                     guardarLog(registro, "data/logs.txt");
                 }
             }
 
-            // 🔹 Actualizar mapa global
             {
                 lock_guard<mutex> lock(mtxIndice);
                 for (auto &par : localContador) {
@@ -181,8 +177,6 @@ void crearIndiceParalelo(const string &rutaLibros, const string &nombreIndice, i
 }
 
 void guardarLog(log nuevoLog, string archivoLogs) {
-    auto start = high_resolution_clock::now();
-
     ofstream archivo(archivoLogs, ios::app);
     if (!archivo.is_open()) {
         cerr << "(ERROR) No se pudo abrir el archivo de logs: " << archivoLogs << endl;
@@ -197,10 +191,6 @@ void guardarLog(log nuevoLog, string archivoLogs) {
             << endl;
 
     archivo.close();
-
-    auto stop = high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    cout << "(INFO) Log guardado en " << duration.count() << " microsegundos." << endl;
 }
 
 
