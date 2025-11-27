@@ -59,3 +59,6 @@ data/
 
 # Ignore `build` dir
 build/
+
+# Ignore `.cache` dir
+.cache/
