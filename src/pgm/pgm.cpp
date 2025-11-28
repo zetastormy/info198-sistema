@@ -4,6 +4,7 @@
 #include "../include/conteo.h"
 #include "../include/calcula_funcion.h"
 #include "../include/palindrome.h"
+#include "../include/analisis_rendimiento.h"
 #include <cstring>
 #include <string>
 #include <cstring>
@@ -18,6 +19,7 @@ int solicitarOpcion(char* perfil);
 void conectarMultiplicaMatrices(string binarioMultMatrices);
 void conectarIndiceInvertido(string binarioIndiceInvertido);
 void conectarIndiceInvertidoParalelo(string binarioIndiceInvertido);
+void conectarBuscador (string binBuscador);
 
 
 int main(int argc, char* argv[]) {
@@ -51,6 +53,7 @@ int main(int argc, char* argv[]) {
     string binarioIndiceInvertido = env.get("CREATE_INDEX");
     string binIndiceInvertidoParalelo = env.get("INDICE_INVET_PARALELO");
     string binJuego = env.get("GAME");
+    string binBuscador = env.get("BUSCADOR");
 
     cargarUsuarios(usuarios, archivoUsuarios);
     int indiceUsuario = autenticarUsuario(usuarios, args::get(usuarioIngresado), args::get(passwordIngresada));
@@ -75,7 +78,9 @@ int main(int argc, char* argv[]) {
         cout << "5) Calcula f(x) = x² + 2x + 8" << endl;
         cout << "6) Conteo sobre texto" << endl;
         cout << "7) Crea índice invertido" << endl;
-        cout << "8) Crea índice invertido en paralelo"<<endl;
+        cout << "8) Crea índice invertido en paralelo" << endl;
+        cout << "9) Buscador índice invertido" << endl;
+        cout << "10) Análisis de rendimiento con threads" << endl;
         cout << endl;
 
         int opcionInt = solicitarOpcion(u.perfil);
@@ -107,6 +112,12 @@ int main(int argc, char* argv[]) {
                 break;
             case 8:
                 conectarIndiceInvertidoParalelo(binIndiceInvertidoParalelo);
+                break;
+            case 9:
+                conectarBuscador(binBuscador);
+                break;
+            case 10:
+                analizar_rendimiento();
                 break;
             case 0:
                 cout << endl;
@@ -317,4 +328,45 @@ void conectarIndiceInvertidoParalelo(string binIndiceInvertidoParalelo) {
             cout << "(ERROR) ¡Opción inválida!" << endl;
             esperarTecla();
     }
+}
+
+void conectarBuscador (string binBuscador){
+    string busqueda;
+    int opcion;
+
+    cout << "---= BUSQUEDA EN ÍNDICE INVERTIDO =---" << endl;
+
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    cout << "Buscar: ";
+    getline(cin, busqueda);
+    cout << endl;
+
+    cout << "Opciones: " << endl;
+    cout << "1) Validar " << endl;
+    cout << "2) Cancelar "<< endl;
+    cout << "Seleccione una opción: ";
+    cin >> opcion;
+    cout << endl;
+
+    switch(opcion){
+        case 1: {
+            if (busqueda.empty()) {
+                cout << "(ERROR) La busqueda no puede estar vacía." << endl;
+                esperarTecla();
+                break;
+            }
+
+            system(("./" + binBuscador).c_str());
+            esperarTecla();
+            break;
+        }
+        case 2:
+            cout << "Operación cancelada." << endl;
+            break;
+        default:
+            cout << "(ERROR) ¡Opción inválida!" << endl;
+            esperarTecla();
+    }
+
+
 }
