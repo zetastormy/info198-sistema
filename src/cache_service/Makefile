@@ -1,6 +1,6 @@
 BIN = ../../bin
-SRC = cache.cpp
-OUT = $(BIN)/cache
+SRC = cache_service.cpp
+OUT = $(BIN)/cache_service
 
 all: $(OUT)
 
