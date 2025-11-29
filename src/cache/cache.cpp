@@ -47,7 +47,13 @@ int main(int argc, char* argv[]) {
             string query(buffer);
 
             cout << "Consulta recibida: " << query << endl;
-            lookupResult(query, topk, queryCache, resultCache, cacheSize);
+
+            json response = lookupResult(query, topk, queryCache, resultCache, cacheSize);
+            string responseStr = response.dump();
+
+            send(clientSocket, responseStr.c_str(), responseStr.size(), 0);
+
+            close(clientSocket);
         } else if (bytesRead == 0) {
             cout << "El cliente terminó la conexión abruptamente." << endl;
         } else {
