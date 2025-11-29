@@ -115,7 +115,7 @@ int main(int argc, char* argv[]) {
                 system(("./" + binBuscador).c_str());
                 break;
             case 10:
-                // analizar_rendimiento();
+                analizar_rendimiento();
                 break;
             case 0:
                 cout << endl;
@@ -257,8 +257,6 @@ void conectarIndiceInvertido(string binarioIndiceInvertido) {
                 break;
             }
 
-            string rutaArchivo = "data/"+ nombreArchivo +".idx";
-
             system(("./" + binarioIndiceInvertido + " " + nombreArchivo + " \"" + rutaCarpeta + "\"").c_str());
             esperarTecla();
             break;
@@ -275,6 +273,9 @@ void conectarIndiceInvertido(string binarioIndiceInvertido) {
 void conectarIndiceInvertidoParalelo(string binIndiceInvertidoParalelo) {
     string nombreArchivo, rutaCarpeta;
     int opcion;
+
+    dotenv env(".env");
+    int n_hilos = stoi(env.get("N_THREADS"));
 
     cout << "---= CONEXIÓN A PROGRAMA DE CREACIÓN ÍNDICE INVERTIDO =---" << endl;
 
@@ -313,9 +314,7 @@ void conectarIndiceInvertidoParalelo(string binIndiceInvertidoParalelo) {
                 break;
             }
 
-            string rutaArchivo = "data/"+ nombreArchivo +".idx";
-
-            system(("./" + binIndiceInvertidoParalelo + " " + nombreArchivo + " \"" + rutaCarpeta + "\"").c_str());
+            system(("./" + binIndiceInvertidoParalelo + " " + nombreArchivo + " " + rutaCarpeta + " "+ to_string(n_hilos)).c_str());
             esperarTecla();
             break;
         }

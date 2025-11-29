@@ -42,7 +42,6 @@
         }
 
 
-
     	cout << "---= CREACIÓN ÍNDICE INVERTIDO (PID: " << getpid() << ") =---" << endl;
     	cout << "Por favor, espere unos segundos mientras se crea el índice invertido..." << endl;
 
