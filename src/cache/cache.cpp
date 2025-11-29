@@ -80,32 +80,32 @@ int startServerSocket(int port) {
 json lookupResult(string query, int topk, deque<string> &queryCache, unordered_map<string, json> &resultCache, int cacheSize) {
     auto lookupStart = high_resolution_clock::now();
 
-    json answer;
-    answer["query"] = query;
-    answer["topk"] = topk;
+    json response;
+    response["query"] = query;
+    response["topk"] = topk;
 
     if (resultCache.count(query) != 0) {
-        answer["result"] = resultCache[query];
+        response["result"] = resultCache[query];
 
         auto lookupEnd = high_resolution_clock::now();
         auto lookupTime = duration_cast<microseconds>(lookupEnd - lookupStart);
 
-        answer["lookupTime"] = lookupTime.count();
+        response["lookupTime"] = lookupTime.count();
 
-        return answer;
+        return response;
     }
 
     json searchResult(searchEngineLookup(query));
     cache(query, searchResult, queryCache, resultCache, cacheSize);
 
-    answer["result"] = searchResult;
+    response["result"] = searchResult;
 
     auto lookupEnd = high_resolution_clock::now();
     auto lookupTime = duration_cast<microseconds>(lookupEnd - lookupStart);
 
-    answer["lookupTime"] = lookupTime.count();
+    response["lookupTime"] = lookupTime.count();
 
-    return answer;
+    return response;
 }
 
 json searchEngineLookup(string query) {
