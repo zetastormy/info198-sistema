@@ -37,12 +37,22 @@ int main(int argc, char* argv[]) {
     while (true) {
         int clientSocket = accept(serverSocket, nullptr, nullptr);
 
+        // Recibimos cadenas de hasta 1024 caracteres
         char buffer[1024] = {0};
-        recv(clientSocket, buffer, sizeof(buffer), 0);
-        string query(buffer);
+        // Leemos el buffer, ignorando la basura que pudiese contener
+        int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0); // -1 para dejar espacio al \0
 
-        cout << "Consulta recibida: " << query << endl;
-        lookupResult(query, topk, queryCache, resultCache, cacheSize);
+        if (bytesRead > 0) {
+            buffer[bytesRead] = '\0'; // Asegurar terminación nula
+            string query(buffer);
+
+            cout << "Consulta recibida: " << query << endl;
+            lookupResult(query, topk, queryCache, resultCache, cacheSize);
+        } else if (bytesRead == 0) {
+            cout << "El cliente terminó la conexión abruptamente." << endl;
+        } else {
+            cout << "Error al recibir datos." << endl;
+        }
     }
 
     close(serverSocket);
