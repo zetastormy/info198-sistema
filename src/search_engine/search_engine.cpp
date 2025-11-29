@@ -8,18 +8,20 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 using namespace std;
 
 unordered_map<string, vector<pair<int, int>>> memoriaIndice;
 int startServerSocket(int searchPort);
+string buscarTopK(string query, int topK);
 bool cargarIndice(string rutaArchivo);
 
 int main (int argc, char**argv) {
     dotenv env(".env");
     int searchPort = stoi(env.get("SEARCH_PORT"));
     int topK = stoi(env.get("TOPK"));
-    string nombreArchivoindice = "example"; // recordatorio para utilizar env
+    string nombreArchivoindice = "indices_prueba"; // recordatorio para utilizar env
     string rutaIndice = "data/" + nombreArchivoindice + ".idx";
 
 
@@ -49,8 +51,7 @@ int main (int argc, char**argv) {
 
         cout << "Consulta recibida: " << query << endl;
 
-
-        string respuesta = "Motor listo. Datos en memoria.";
+        string respuesta = buscarTopK(query, topK);
         send(clientSocket, respuesta.c_str(), respuesta.size(), 0);
 
         close(clientSocket);
@@ -58,6 +59,30 @@ int main (int argc, char**argv) {
 
     close(serverSocket);
     return 0;
+}
+
+string buscarTopK(string query, int topK) {
+    auto posicionQuery = memoriaIndice.find(query);
+    if ( posicionQuery == memoriaIndice.end()) return "Sin resultados para: " + query;
+
+    vector<pair<int, int>> listaResultados = posicionQuery -> second;
+
+    sort(listaResultados.begin(), listaResultados.end(),
+        [](const pair<int, int>& a, const pair<int,int>& b) {
+            return a.second > b.second;
+        });
+
+    string respuesta = "";
+    int contador = 0;
+
+    for (const auto& par : listaResultados) {
+        if (contador >= topK) break;
+
+        respuesta += "(" + to_string(par.first) + "," + to_string(par.second) +");";
+        contador++;
+    }
+
+    return respuesta;
 }
 
 bool cargarIndice(string rutaArchivo) {
