@@ -81,6 +81,8 @@ json lookupResult(string query, int topk, deque<string> &queryCache, unordered_m
         auto lookupTime = duration_cast<microseconds>(lookupEnd - lookupStart);
 
         answer["lookupTime"] = lookupTime.count();
+
+        return answer;
     }
 
     json searchResult(searchEngineLookup(query));
@@ -104,7 +106,7 @@ void cache(string query, json result, deque<string> &queryCache, unordered_map<s
     // Si el cache no está lleno todavía
     if (queryCache.size() < cacheSize) {
         queryCache.push_back(query);
-        resultCache[result];
+        resultCache[query] = result;
 
         return;
     }
