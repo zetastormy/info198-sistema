@@ -1,6 +1,6 @@
 BIN = ../../bin
-SRC = cache.cpp
-OUT = $(BIN)/cache
+SRC = search.cpp ../common/util.cpp
+OUT = $(BIN)/search
 
 all: $(OUT)
 

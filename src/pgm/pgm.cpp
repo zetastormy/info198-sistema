@@ -19,8 +19,6 @@ int solicitarOpcion(char* perfil);
 void conectarMultiplicaMatrices(string binarioMultMatrices);
 void conectarIndiceInvertido(string binarioIndiceInvertido);
 void conectarIndiceInvertidoParalelo(string binarioIndiceInvertido);
-void conectarBuscador (string binBuscador);
-
 
 int main(int argc, char* argv[]) {
     args::ArgumentParser parser("Programa principal del sistema creado para INFO198.");
@@ -114,10 +112,10 @@ int main(int argc, char* argv[]) {
                 conectarIndiceInvertidoParalelo(binIndiceInvertidoParalelo);
                 break;
             case 9:
-                conectarBuscador(binBuscador);
+                system(("./" + binBuscador).c_str());
                 break;
             case 10:
-                analizar_rendimiento();
+                // analizar_rendimiento();
                 break;
             case 0:
                 cout << endl;
@@ -328,45 +326,4 @@ void conectarIndiceInvertidoParalelo(string binIndiceInvertidoParalelo) {
             cout << "(ERROR) ¡Opción inválida!" << endl;
             esperarTecla();
     }
-}
-
-void conectarBuscador (string binBuscador){
-    string busqueda;
-    int opcion;
-
-    cout << "---= BUSQUEDA EN ÍNDICE INVERTIDO =---" << endl;
-
-    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    cout << "Buscar: ";
-    getline(cin, busqueda);
-    cout << endl;
-
-    cout << "Opciones: " << endl;
-    cout << "1) Validar " << endl;
-    cout << "2) Cancelar "<< endl;
-    cout << "Seleccione una opción: ";
-    cin >> opcion;
-    cout << endl;
-
-    switch(opcion){
-        case 1: {
-            if (busqueda.empty()) {
-                cout << "(ERROR) La busqueda no puede estar vacía." << endl;
-                esperarTecla();
-                break;
-            }
-
-            system(("./" + binBuscador).c_str());
-            esperarTecla();
-            break;
-        }
-        case 2:
-            cout << "Operación cancelada." << endl;
-            break;
-        default:
-            cout << "(ERROR) ¡Opción inválida!" << endl;
-            esperarTecla();
-    }
-
-
 }
