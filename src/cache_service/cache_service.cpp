@@ -11,8 +11,8 @@ using namespace chrono;
 using json = nlohmann::json;
 
 int startServerSocket(int port);
-json lookupResult(string query, int topk, deque<string> &queryCache, unordered_map<string, json> &resultsCache, int cacheSize);
-json searchEngineLookup(string query);
+json lookupResult(string query, int topk, deque<string> &queryCache, unordered_map<string, json> &resultsCache, int cacheSize, int searchPort);
+json searchEngineLookup(string query, int searchPort);
 void cache(string query, json result, deque<string> &queryCache, unordered_map<string, json> &resultsCache, int cacheSize);
 
 // DATOS DE PRUEBA GENERADOS POR GEMINI (BORRAR UNA VEZ REALIZADA CONEXIÓN CON MOTOR DE BÚSQUEDA)
@@ -59,23 +59,24 @@ int main(int argc, char* argv[]) {
     dotenv env(".env");
     int topk = stoi(env.get("TOPK"));
     int cacheSize = stoi(env.get("CACHE_SIZE"));
-    int port = stoi(env.get("CACHE_PORT"));
+    int cachePort = stoi(env.get("CACHE_PORT"));
+    int searchPort = stoi(env.get("SEARCH_PORT"));
 
     deque<string> queryCache;
     unordered_map<string, json> resultsCache;
 
     preloadCache(queryCache, resultsCache, cacheSize);
 
-    int serverSocket = startServerSocket(port);
+    int serverSocket = startServerSocket(cachePort);
 
     cout << "---= SERVICIO CACHE DE BÚSQUEDAS (PID: " << getpid() << ") =---" << endl;
 
     if (serverSocket == -1) {
-        cout << "Error al crear socket de servicio de cache, posiblemente porque el puerto " << port << " está ocupado." << endl;
+        cout << "Error al crear socket de servicio de cache, posiblemente porque el puerto " << cachePort << " está ocupado." << endl;
         return -1;
     }
 
-    cout << "Escuchando en puerto " << port << "." << endl;
+    cout << "(INFO) Escuchando en puerto " << cachePort << "." << endl;
 
     while (true) {
         int clientSocket = accept(serverSocket, nullptr, nullptr);
@@ -91,16 +92,16 @@ int main(int argc, char* argv[]) {
 
             cout << "Consulta recibida: " << query << endl;
 
-            json response = lookupResult(query, topk, queryCache, resultsCache, cacheSize);
+            json response = lookupResult(query, topk, queryCache, resultsCache, cacheSize, searchPort);
             string responseStr = response.dump();
 
             send(clientSocket, responseStr.c_str(), responseStr.size(), 0);
 
             close(clientSocket);
         } else if (bytesRead == 0) {
-            cout << "El cliente terminó la conexión abruptamente." << endl;
+            cout << "(ERROR) El cliente terminó la conexión abruptamente." << endl;
         } else {
-            cout << "Error al recibir datos." << endl;
+            cout << "(ERROR) Error al recibir datos." << endl;
         }
     }
 
@@ -126,7 +127,7 @@ int startServerSocket(int port) {
     return serverSocket;
 }
 
-json lookupResult(string query, int topk, deque<string> &queryCache, unordered_map<string, json> &resultsCache, int cacheSize) {
+json lookupResult(string query, int topk, deque<string> &queryCache, unordered_map<string, json> &resultsCache, int cacheSize, int searchPort) {
     auto lookupStart = high_resolution_clock::now();
 
     json response;
@@ -144,7 +145,7 @@ json lookupResult(string query, int topk, deque<string> &queryCache, unordered_m
         return response;
     }
 
-    json searchResults(searchEngineLookup(query));
+    json searchResults(searchEngineLookup(query, searchPort));
     cache(query, searchResults, queryCache, resultsCache, cacheSize);
 
     response["results"] = searchResults;
@@ -157,8 +158,40 @@ json lookupResult(string query, int topk, deque<string> &queryCache, unordered_m
     return response;
 }
 
-json searchEngineLookup(string query) {
-    return nullptr;
+json searchEngineLookup(string query, int searchPort) {
+    int clientSocket = socket(AF_INET, SOCK_STREAM, 0);
+
+    sockaddr_in serverAddress;
+    serverAddress.sin_family = AF_INET;
+    serverAddress.sin_port = htons(searchPort);
+    serverAddress.sin_addr.s_addr = INADDR_ANY;
+
+    int status = connect(clientSocket, (struct sockaddr*) &serverAddress, sizeof(serverAddress));
+
+    if (status == -1) {
+        cout << "(ERROR) El motor de búsqueda está caído." << endl;
+        return json::array();
+    }
+
+    send(clientSocket, query.c_str(), query.size(), 0);
+
+    // Recibimos cadenas de hasta 1024 caracteres
+    char buffer[1024] = {0};
+    // Leemos el buffer, ignorando la basura que pudiese contener
+    int bytesRead = recv(clientSocket, buffer, sizeof(buffer) - 1, 0); // -1 para dejar espacio al \0
+
+    if (bytesRead > 0) {
+        buffer[bytesRead] = '\0'; // Asegurar terminación nula
+        string rawResults(buffer);
+
+        return json::parse(rawResults);
+    } else if (bytesRead == 0) {
+        cout << "(ERROR) El cliente terminó la conexión abruptamente." << endl;
+    } else {
+        cout << "(ERROR) Error al recibir datos." << endl;
+    }
+
+    return json::array();
 }
 
 void cache(string query, json result, deque<string> &queryCache, unordered_map<string, json> &resultCache, int cacheSize) {

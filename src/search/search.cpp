@@ -66,7 +66,7 @@ void search(string query, int cachePort) {
     int status = connect(clientSocket, (struct sockaddr*) &serverAddress, sizeof(serverAddress));
 
     if (status == -1) {
-        cout << "El servicio de búsquedas está caído." << endl;
+        cout << "(ERROR) El servicio de búsquedas está caído." << endl;
         return;
     }
 
@@ -85,9 +85,9 @@ void search(string query, int cachePort) {
 
         showResults(searchResults);
     } else if (bytesRead == 0) {
-        cout << "El cliente terminó la conexión abruptamente." << endl;
+        cout << "(ERROR) El cliente terminó la conexión abruptamente." << endl;
     } else {
-        cout << "Error al recibir datos." << endl;
+        cout << "(ERROR) Error al recibir datos." << endl;
     }
 
     close(clientSocket);
