@@ -83,7 +83,11 @@ void search(string query, int cachePort) {
 
         json searchResults = json::parse(rawResults);
 
-        showResults(searchResults);
+        if (searchResults["status"].get<string>() == "ERROR") {
+            cout << "(ERROR) " << searchResults["message"].get<string>() << endl;
+        } else {
+            showResults(searchResults);
+        }
     } else if (bytesRead == 0) {
         cout << "(ERROR) El cliente terminó la conexión abruptamente." << endl;
     } else {

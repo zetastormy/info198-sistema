@@ -1,6 +1,7 @@
 #include "../include/dotenv.h"
 #include "../include/json.hpp"
 #include <string>
+#include <string.h>
 #include <unistd.h>
 #include <unordered_map>
 #include <deque>
@@ -141,19 +142,34 @@ json lookupResult(string query, int topk, deque<string> &queryCache, unordered_m
         auto lookupTime = duration_cast<microseconds>(lookupEnd - lookupStart);
 
         response["lookupTime"] = lookupTime.count();
+        response["status"] = "OK";
 
         return response;
     }
 
-    json searchResults(searchEngineLookup(query, searchPort));
-    cache(query, searchResults, queryCache, resultsCache, cacheSize);
+    json engineResponse(searchEngineLookup(query, searchPort));
 
-    response["results"] = searchResults;
+    if (engineResponse["status"].get<string>() == "ERROR") {
+        response["status"] = "ERROR";
+        response["message"] = engineResponse["message"].get<string>();
+
+        auto lookupEnd = high_resolution_clock::now();
+        auto lookupTime = duration_cast<microseconds>(lookupEnd - lookupStart);
+
+        response["lookupTime"] = lookupTime.count();
+
+        return response;
+    }
+
+    cache(query, engineResponse, queryCache, resultsCache, cacheSize);
+
+    response["results"] = engineResponse;
 
     auto lookupEnd = high_resolution_clock::now();
     auto lookupTime = duration_cast<microseconds>(lookupEnd - lookupStart);
 
     response["lookupTime"] = lookupTime.count();
+    response["status"] = "OK";
 
     return response;
 }
@@ -168,9 +184,14 @@ json searchEngineLookup(string query, int searchPort) {
 
     int status = connect(clientSocket, (struct sockaddr*) &serverAddress, sizeof(serverAddress));
 
+    json response;
+
     if (status == -1) {
         cout << "(ERROR) El motor de búsqueda está caído." << endl;
-        return json::array();
+        response["status"] = "ERROR";
+        response["message"] = "El motor de búsqueda está caído.";
+
+        return response;
     }
 
     send(clientSocket, query.c_str(), query.size(), 0);
@@ -184,14 +205,29 @@ json searchEngineLookup(string query, int searchPort) {
         buffer[bytesRead] = '\0'; // Asegurar terminación nula
         string rawResults(buffer);
 
-        return json::parse(rawResults);
+        // Verificamos por si hay algún error al parsear el JSON entregado por el motor
+        try {
+            response["results"] = json::parse(rawResults);
+            response["status"] = "OK";
+
+            return response;
+        } catch (json::parse_error e) {
+            response["status"] = "ERROR";
+            response["message"] = "Formato de JSON entregado por motor de búsqueda inválido.";
+
+            return response;
+        }
     } else if (bytesRead == 0) {
         cout << "(ERROR) El cliente terminó la conexión abruptamente." << endl;
+        response["status"] = "ERROR";
+        response["message"] = "El cliente terminó la conexión abruptamente.";
     } else {
         cout << "(ERROR) Error al recibir datos." << endl;
+        response["status"] = "ERROR";
+        response["message"] = "Error al recibir datos.";
     }
 
-    return json::array();
+    return response;
 }
 
 void cache(string query, json result, deque<string> &queryCache, unordered_map<string, json> &resultCache, int cacheSize) {
