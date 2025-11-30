@@ -29,8 +29,12 @@ usuarios almacenados.
 
 ### Compilación
 
-Para facilitar la compilación de los programas, se ha puesto a su disposición el script `build.sh`, este ejecutará
-el comando `make` en los directorios de cada uno de los programas donde se encuentra su respectivo Makefile. Simplemente ejecute el script de la siguiente manera:
+Para facilitar la compilación de todos los componentes del sistema, se ha puesto a su disposición el script `build.sh`. Este script automatiza el proceso de construcción de la siguiente manera:
+
+1. **Herramientas de consola:** Ejecuta `make` en los directorios correspondientes (`admin_usuarios`, `pgm`, `multi`, `indice_invertido`, `cache_service`, etc.).
+2. **Juego Multijugador:** Configura y compila el proyecto utilizando `CMake` (generando una carpeta temporal `build`).
+
+Simplemente ejecute el script de la siguiente manera:
 
 ```bash
 ./build.sh
@@ -94,6 +98,12 @@ El programa dispone de múltiples variables de entorno para facilitar la manipul
 
 - `INDICE_INVET_PARALELO`: especifica el lugar donde está alojado el binario al sistema creador de índices invertidos paralelo.
 
+- `GAME`: especifica el lugar donde está alojado el binario del juego multijugador.
+
+- `CACHE`: especifica el lugar donde está alojado el binario del servicio de caché.
+
+- `BUSCADOR`: especifica el lugar donde está alojado el binario del servicio de búsqueda.
+
 - `N_THREADS`: especifica el número de hilos a utilizar en la creación de índice invertido de forma paralela.
 
 - `N_LOTE`: especifica el tamaño del lote de libros que se mantendrán en memoria al crear el índice invertido de forma paralela.
@@ -101,6 +111,20 @@ El programa dispone de múltiples variables de entorno para facilitar la manipul
 - `MAPA_LIBROS`: especifica la ubicación del archivo donde se almacenan los ID asociados a cada libro.
 
 - `WIN_THRESHOLD`: especifica el número de puntos necesarios para ganar el juego.
+
+- `CACHE_SIZE`: determina el tamaño máximo que puede almacenar el servicio de caché.
+
+- `CACHE_PORT`: define el puerto TCP donde se expone el servicio de caché.
+
+- `SEARCH_PORT`: define el puerto TCP donde se expone el servicio de búsqueda.
+
+- `TOPK`: especifica la cantidad máxima de resultados más relevantes que entregará el motor de búsqueda al realizar una consulta.
+
+- `CARPETA_GRAFICOS`: especifica la carpeta donde se guardarán los gráficos generados por los análisis de rendimiento.
+
+- `LOG_RENDIMIENTO`: indica la ruta del archivo donde se registrará la información de rendimiento.
+
+- `LOG_JUEGO`: indica la ruta del archivo donde se registrará la actividad del juego.
 
 ## Uso del sistema
 
