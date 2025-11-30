@@ -21,6 +21,7 @@
     int n_lote = stoi(env.get("N_LOTE"));
     int n_hilos = stoi(env.get("N_THREADS"));
     string rutaMapa = env.get("MAPA_LIBROS");
+    string rutaLog = env.get("LOG_INDICE");
 
     bool crearIndiceInvertido(string nombreIndice, string rutaLibros);
     wchar_t normalizar(wchar_t c);
@@ -143,7 +144,7 @@
 
                     {
                         lock_guard<mutex> lock(mtxIndice);
-                        guardarLog(registro, "data/logs.txt");
+                        guardarLog(registro, rutaLog);
                     }
                 }
 
@@ -179,7 +180,15 @@
     }
 
     void guardarLog(log nuevoLog, string archivoLogs) {
+        filesystem::path ruta(archivoLogs);
+
+        if (!exists(ruta.parent_path())) {
+            cout << "(INFO) El directorio no existía. Se creará: " << ruta.parent_path() << endl;
+            create_directories(ruta.parent_path());
+        }
+
         ofstream archivo(archivoLogs, ios::app);
+
         if (!archivo.is_open()) {
             cerr << "(ERROR) No se pudo abrir el archivo de logs: " << archivoLogs << endl;
             return;
