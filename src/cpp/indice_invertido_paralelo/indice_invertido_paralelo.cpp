@@ -177,6 +177,8 @@
             }
             archivoIndice << endl;
         }
+        ofstream archivo(rutaLog, ios::app);
+        archivo<<endl;
     }
 
     void guardarLog(log nuevoLog, string archivoLogs) {
