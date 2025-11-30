@@ -1,6 +1,6 @@
 #!/bin/bash
-makefile_progs=( "src/admin_usuarios" "src/pgm" "src/multi" "src/indice_invertido" "src/indice_invertido_paralelo" "src/cache_service" "src/search" )
-cmake_progs=( "src/juego" )
+makefile_progs=( "src/cpp/admin_usuarios" "src/cpp/pgm" "src/cpp/multi" "src/cpp/indice_invertido" "src/cpp/indice_invertido_paralelo" "src/cpp/cache_service" "src/cpp/search" )
+cmake_progs=( "src/cpp/juego" )
 
 for makefile_prog in "${makefile_progs[@]}"
 do

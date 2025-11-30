@@ -1,4 +1,4 @@
-BIN = ../../bin
+BIN = ../../../bin
 SRC = indice_invertido.cpp ../common/util.cpp
 OUT = $(BIN)/indice_invertido
 

@@ -1,4 +1,4 @@
-BIN = ../../bin
+BIN = ../../../bin
 SRC = multi.cpp
 OUT = $(BIN)/multi
 

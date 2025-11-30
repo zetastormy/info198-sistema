@@ -1,4 +1,4 @@
-BIN = ../../bin
+BIN = ../../../bin
 SRC = search.cpp ../common/util.cpp
 OUT = $(BIN)/search
 

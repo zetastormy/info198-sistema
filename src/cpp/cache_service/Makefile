@@ -1,4 +1,4 @@
-BIN = ../../bin
+BIN = ../../../bin
 SRC = cache_service.cpp
 OUT = $(BIN)/cache_service
 

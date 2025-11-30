@@ -22,7 +22,7 @@ void analizar_rendimiento(){
     for (int i = 0 ; i < size ; i++){
         cout<<"Indice invertido con "<<CANT_THREADS[i]<<" hilo(s)"<<endl;
         int numThreads = CANT_THREADS[i];
-        ejecutar_medir (numThreads, binIndiceInvertidoParalelo,"./libros");
+        ejecutar_medir (numThreads, binIndiceInvertidoParalelo,"./resources/libros");
         cout<<endl;
     }
     ofstream archivo("data/logs2.txt", ios::app);

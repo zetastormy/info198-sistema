@@ -1,4 +1,4 @@
-BIN = ../../bin
+BIN = ../../../bin
 SRC = pgm.cpp ../common/util.cpp ../common/conteo.cpp ../common/calcula_funcion.cpp ../common/palindrome.cpp ../analisis_rendimiento/analisis.cpp
 OUT = $(BIN)/pgm
 
