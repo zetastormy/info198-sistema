@@ -38,13 +38,16 @@ void MainWindow::on_hostButton_clicked() {
     QString path = QCoreApplication::applicationDirPath() + "/../.env";
     dotenv env(path.toStdString());
 
+    // Leemos el puerto o usamos 8020 por defecto si no existe
+    int gamePort = std::stoi(env.get("GAME_PORT", "8020"));
+
     qDebug() << "Iniciando modo host...";
     m_server = new Server(this);
     m_server->startServer();
 
     ui->statusbar->showMessage("Creando partida (conectando a 127.0.0.1)...");
     m_connectionTimer->start(10000); // 10 segundos de tiempo límite
-    m_socket->connectToHost(QHostAddress("127.0.0.1"), 8080);
+    m_socket->connectToHost(QHostAddress("127.0.0.1"), gamePort);
 
     ui->hostButton->setEnabled(false);
     ui->joinButton->setEnabled(false);
@@ -61,9 +64,15 @@ void MainWindow::on_joinButton_clicked() {
 
     qDebug() << "Iniciando modo cliente, conectando a" << ip;
 
+    QString path = QCoreApplication::applicationDirPath() + "/../.env";
+    dotenv env(path.toStdString());
+
+    // Leemos el puerto o usamos 8020 por defecto si no existe
+    int gamePort = std::stoi(env.get("GAME_PORT", "8020"));
+
     ui->statusbar->showMessage("Conectando a " + ip + "...");
     m_connectionTimer->start(10000); // 10 segundos de tiempo límite
-    m_socket->connectToHost(QHostAddress(ip), 8080);
+    m_socket->connectToHost(QHostAddress(ip), gamePort);
 
     ui->hostButton->setEnabled(false);
     ui->joinButton->setEnabled(false);
