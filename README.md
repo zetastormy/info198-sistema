@@ -118,6 +118,8 @@ El programa dispone de múltiples variables de entorno para facilitar la manipul
 
 - `SEARCH_PORT`: define el puerto TCP donde se expone el servicio de búsqueda.
 
+- `GAME_PORT`: define el puerto TCP donde está corriendo el servidor del juego.
+
 - `TOPK`: especifica la cantidad máxima de resultados más relevantes que entregará el motor de búsqueda al realizar una consulta.
 
 - `CARPETA_GRAFICOS`: especifica la carpeta donde se guardarán los gráficos generados por los análisis de rendimiento.
@@ -125,6 +127,8 @@ El programa dispone de múltiples variables de entorno para facilitar la manipul
 - `LOG_RENDIMIENTO`: indica la ruta del archivo donde se registrará la información de rendimiento.
 
 - `LOG_JUEGO`: indica la ruta del archivo donde se registrará la actividad del juego.
+
+- `LOG_INDICE`: indica la ruta del archivo donde se registrará estadísticas de la creación de índices en paralelo.
 
 ## Uso del sistema
 
