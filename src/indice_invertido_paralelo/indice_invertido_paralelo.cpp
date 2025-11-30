@@ -37,9 +37,6 @@
     	string nombreIndice = argv[1];
     	string rutaLibros = argv[2];
         int nThreads = atoi (argv [3]);
-        if (nThreads <=0){ //Si no recibe nada util, le asigno la variable de entorno
-            nThreads = n_hilos;
-        }
 
 
     	cout << "---= CREACIÓN ÍNDICE INVERTIDO (PID: " << getpid() << ") =---" << endl;

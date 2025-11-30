@@ -3,15 +3,14 @@
 #include <chrono>
 #include <unistd.h>
 #include <sys/wait.h>
-#include <algorithm>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
-#include <filesystem>
 using namespace std;
 
 void analizar_rendimiento();
 void ejecutar_medir(int nThreads, string bin, string rutaLibros);
+void saveLog(string archivoLogs, int cantThreads, std::chrono::milliseconds duracion );
 
 
 void analizar_rendimiento(){
@@ -26,6 +25,8 @@ void analizar_rendimiento(){
         ejecutar_medir (numThreads, binIndiceInvertidoParalelo,"./libros");
         cout<<endl;
     }
+    ofstream archivo("data/logs2.txt", ios::app);
+    archivo<<endl;
 }
 
 void ejecutar_medir(int nThreads, string bin, string rutaLibros){
@@ -49,5 +50,17 @@ void ejecutar_medir(int nThreads, string bin, string rutaLibros){
     auto end = std::chrono::high_resolution_clock::now();
     auto duracion_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     cout << "(DEBUG) Duración en MS (bruto): " << duracion_ms.count() << " ms" << endl;
+    saveLog("data/logs2.txt", nThreads, duracion_ms);
 
+}
+
+void saveLog(string archivoLogs, int cantThreads, std::chrono::milliseconds duracion ) {
+    ofstream archivo(archivoLogs, ios::app);
+    if (!archivo.is_open()) {
+        cerr << "(ERROR) No se pudo abrir el archivo de logs: " << archivoLogs << endl;
+        return;
+    }
+
+    archivo << "N_THREADS: " << cantThreads<< ", TIME: " << duracion.count()<< endl;
+    archivo.close();
 }
