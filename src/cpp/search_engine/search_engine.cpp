@@ -1,4 +1,5 @@
 #include "../include/dotenv.h"
+#include "../include/json.hpp"
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -11,11 +12,15 @@
 #include <utility>
 #include <vector>
 using namespace std;
+using json = nlohmann::json;
 
 unordered_map<string, vector<pair<int, int>>> memoriaIndice;
+unordered_map<int, string> baseDatosLibros;
+
 int startServerSocket(int searchPort);
 string buscarTopK(string query, int topK);
 bool cargarIndice(string rutaArchivo);
+bool cargarBaseDatosLibros(string rutaArchivo);
 
 int main (int argc, char**argv) {
     dotenv env(".env");
@@ -23,6 +28,7 @@ int main (int argc, char**argv) {
     int topK = stoi(env.get("TOPK"));
     string nombreArchivoindice = "indices_prueba"; // recordatorio para utilizar env
     string rutaIndice = "data/" + nombreArchivoindice + ".idx";
+    string rutaLibros = "resources/mapaLibros.txt";
 
 
     cout << "---= MOTOR DE BUSQUEDA (PID: )" << getpid() << ") =---" << endl;
@@ -30,6 +36,10 @@ int main (int argc, char**argv) {
     if (!cargarIndice(rutaIndice)) {
         cerr << "(FATAL) No se pudo cargar el índice. Asegúrate de haber ejecutado indice_invetido primero." << endl;
         return 1;
+    }
+
+    if (!cargarBaseDatosLibros(rutaLibros)) {
+        cout << "(FATAL) No se pudo cargar el mapa de libros. se usarán los IDs." << endl;
     }
 
     int serverSocket = startServerSocket(searchPort);
@@ -78,11 +88,45 @@ string buscarTopK(string query, int topK) {
     for (const auto& par : listaResultados) {
         if (contador >= topK) break;
 
-        respuesta += "(" + to_string(par.first) + "," + to_string(par.second) +");";
+        int idLibro = par.first;
+
+        string titulo = "Desconocido (ID:" + to_string(idLibro) + ").";
+        if (baseDatosLibros.count(idLibro)) {
+            titulo = baseDatosLibros[idLibro];
+        }
+
+        respuesta += "(" + titulo + "," + to_string(par.second) +");";
         contador++;
     }
 
     return respuesta;
+}
+
+bool cargarBaseDatosLibros(string rutaArchivo) {
+    cout << "Cargando los nombres de los libros desde: " << rutaArchivo << endl;
+    ifstream archivoTitulos(rutaArchivo);
+
+    if (!archivoTitulos.is_open()) return false;
+
+    string linea;
+    while (getline(archivoTitulos, linea)) {
+        stringstream ss(linea);
+        string idLibro, nombreLibro;
+
+        if (getline(ss, idLibro, ';')) {
+            if (getline(ss, nombreLibro)) {
+                try {
+                    int id = stoi(idLibro);
+                    baseDatosLibros[id] = nombreLibro;
+                } catch (...) {
+                    continue;
+                }
+            }
+        }
+    }
+
+    cout << "Libros cargados: " << baseDatosLibros.size() << " libros" << endl;
+    return true;
 }
 
 bool cargarIndice(string rutaArchivo) {
