@@ -16,46 +16,6 @@ json lookupResult(string query, int topk, deque<string> &queryCache, unordered_m
 json searchEngineLookup(string query, int searchPort);
 void cache(string query, json result, deque<string> &queryCache, unordered_map<string, json> &resultsCache, int cacheSize);
 
-// DATOS DE PRUEBA GENERADOS POR GEMINI (BORRAR UNA VEZ REALIZADA CONEXIÓN CON MOTOR DE BÚSQUEDA)
-void preloadCache(deque<string> &queryCache, unordered_map<string, json> &resultsCache, int cacheSize) {
-    // 1. Query: "ciencia ficcion"
-    // Simulamos una lista de resultados desordenada o parcialmente ordenada
-    string q1 = "ciencia ficcion";
-    json r1 = json::array({
-        { {"title", "Dune"}, {"score", 98} },
-        { {"title", "Neuromancer"}, {"score", 92} },
-        { {"title", "Fahrenheit 451"}, {"score", 85} },
-        { {"title", "The Three-Body Problem"}, {"score", 96} } // Un intruso con alto score
-    });
-    cache(q1, r1, queryCache, resultsCache, cacheSize);
-
-    // 2. Query: "programacion c++"
-    string q2 = "programacion c++";
-    json r2 = json::array({
-        { {"title", "Effective Modern C++"}, {"score", 99} },
-        { {"title", "The C++ Programming Language"}, {"score", 95} },
-        { {"title", "A Tour of C++"}, {"score", 90} }
-    });
-    cache(q2, r2, queryCache, resultsCache, cacheSize);
-
-    // 3. Query: "novelas visuales"
-    string q3 = "novelas visuales";
-    json r3 = json::array({
-        { {"title", "Steins;Gate"}, {"score", 100} },
-        { {"title", "Clannad"}, {"score", 97} },
-        { {"title", "Fate/Stay Night"}, {"score", 94} }
-    });
-    cache(q3, r3, queryCache, resultsCache, cacheSize);
-
-    // 4. Query: "dbz" (Para probar relleno)
-    string q4 = "dbz";
-    json r4 = json::array({
-        { {"title", "Dragon Ball Super: Broly Manga"}, {"score", 88} },
-        { {"title", "Dragon Ball Z - Saiyan Arc"}, {"score", 91} }
-    });
-    cache(q4, r4, queryCache, resultsCache, cacheSize);
-}
-
 int main(int argc, char* argv[]) {
     dotenv env(".env");
     int topk = stoi(env.get("TOPK"));
@@ -65,8 +25,6 @@ int main(int argc, char* argv[]) {
 
     deque<string> queryCache;
     unordered_map<string, json> resultsCache;
-
-    preloadCache(queryCache, resultsCache, cacheSize);
 
     int serverSocket = startServerSocket(cachePort);
 
@@ -161,9 +119,9 @@ json lookupResult(string query, int topk, deque<string> &queryCache, unordered_m
         return response;
     }
 
-    cache(query, engineResponse, queryCache, resultsCache, cacheSize);
+    cache(query, engineResponse["results"], queryCache, resultsCache, cacheSize);
 
-    response["results"] = engineResponse;
+    response["results"] = engineResponse["results"];
 
     auto lookupEnd = high_resolution_clock::now();
     auto lookupTime = duration_cast<microseconds>(lookupEnd - lookupStart);
