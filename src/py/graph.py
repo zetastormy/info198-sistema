@@ -60,7 +60,7 @@ def procesar_log(ruta_log):
     log_debug(f"GENERANDO ESTADÍSTICAS GLOBALES. Ruta: {ruta_log}")
 
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    ruta_default = os.path.join(base_dir, "graficos")
+    ruta_default = os.path.join(base_dir, "data/graphs/")
     output_dir = os.getenv('CARPETA_GRAFICOS', ruta_default)
     log_debug(f"Carpeta de salida configurada: {output_dir}")
     if not os.path.exists(output_dir): 
