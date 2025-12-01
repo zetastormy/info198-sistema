@@ -1,6 +1,7 @@
 #include "../include/dotenv.h"
 #include "../include/json.hpp"
 #include <codecvt>
+#include <cstdlib>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -23,16 +24,20 @@ string buscarTopK(string query, int topK);
 bool cargarIndice(string rutaArchivo);
 bool cargarBaseDatosLibros(string rutaArchivo);
 
-int main (int argc, char**argv) {
+int main (int argc, char **argv) {
     dotenv env(".env");
     int searchPort = stoi(env.get("SEARCH_PORT"));
     int topK = stoi(env.get("TOPK"));
-    string nombreArchivoindice = "indices_prueba"; // recordatorio para utilizar env
-    string rutaIndice = "data/" + nombreArchivoindice + ".idx";
     string rutaLibros = "resources/mapaLibros.txt";
 
+    if (argc != 2) {
+        cout << "(ERROR) Debe ejecutarse como ./bin/search_engine \"<ruta archivo indice>\"" << endl;
+        exit(EXIT_FAILURE);
+    }
+    cout << "---= MOTOR DE BUSQUEDA (PID: " << getpid() << ") =---" << endl;
 
-    cout << "---= MOTOR DE BUSQUEDA (PID: )" << getpid() << ") =---" << endl;
+    string rutaIndice = argv[1];
+    cout << "(INFO) Usando indice especificado: " << rutaIndice << endl;
 
     if (!cargarIndice(rutaIndice)) {
         cerr << "(FATAL) No se pudo cargar el índice. Asegúrate de haber ejecutado indice_invetido primero." << endl;
@@ -48,7 +53,7 @@ int main (int argc, char**argv) {
         cout << "Error al iniciar socket en puerto, posiblemente porque el puerto " << searchPort << "está ocupado." << endl;
     }
 
-    cout << "Motor listo y escuchando en puerto " << searchPort << "." << endl;
+    cout << "Motor listo y escuchando en puerto " << searchPort << "." << endl << "---=LOG DE ACTIVIDAD (Esperando cliente...)=---" << endl;
 
     while(true) {
         int clientSocket = accept(serverSocket, nullptr, nullptr);
@@ -136,7 +141,6 @@ bool cargarBaseDatosLibros(string rutaArchivo) {
 }
 
 bool cargarIndice(string rutaArchivo) {
-    cout << "Cargando archivo desde: " << rutaArchivo << endl;
     ifstream archivoIndices(rutaArchivo);
 
     if (!archivoIndices.is_open()) return false;
@@ -159,7 +163,6 @@ bool cargarIndice(string rutaArchivo) {
 
             if (!ssSegmento.fail()) {
                 memoriaIndice[palabra].push_back({docID, frecuencia});
-                cout << "Guardado: " << palabra << "-> ID:" << docID << endl;
             }
         }
     }
