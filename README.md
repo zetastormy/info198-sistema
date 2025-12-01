@@ -145,6 +145,8 @@ El programa principal es ejecutado usando el comando que se específico en la se
 - **Conteo sobre texto (`6`):** Utiliza el archivo de texto pasado por parámetros para contar palabras, vocales, consonantes y caracteres especiales.
 - **Crea índice invertido (`7`):** Genera un índice invertido de las palabras contenidas en una carpeta de libros (en formato de texto).
 - **Crea índice invertido paralelo (`8`):** Genera un índice invertido de las palabras contenidas en una carpeta de libros (en formato de texto) de forma paralela.
+- **Buscador índice invertido (`9`):** Ejecuta el cliente de búsqueda que consulta el índice invertido previamente generado para devolver las coincidencias más relevantes.
+- **Análisis de rendimiento con threads (`10`):** Lanza la utilidad que mide el tiempo de ejecución del índice paralelo variando el número de hilos y registra los resultados para graficarlos.
 
 ### Juego multijugador
 
