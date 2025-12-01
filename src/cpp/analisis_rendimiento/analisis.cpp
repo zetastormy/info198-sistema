@@ -8,29 +8,29 @@
 #include <unistd.h>
 using namespace std;
 
+#define CANT_THREADS {1, 2, 3, 4, 5}
+
+dotenv env (".env");
+string rutaLog = env.get("LOG_RENDIMIENTO");
+string binIndiceInvertidoParalelo = env.get("INDICE_INVET_PARALELO");
+
 void analizar_rendimiento();
 void ejecutar_medir(int nThreads, string bin, string rutaLibros);
 void saveLog(string archivoLogs, int cantThreads, std::chrono::milliseconds duracion );
 
 
 void analizar_rendimiento(){
-    dotenv env(".env");
-    string binIndiceInvertidoParalelo = env.get("INDICE_INVET_PARALELO");
-
-    int CANT_THREADS [5] = {1, 2, 3, 4, 5};
-    int size = sizeof (CANT_THREADS)/sizeof(CANT_THREADS[0]);
-    for (int i = 0 ; i < size ; i++){
-        cout<<"Indice invertido con "<<CANT_THREADS[i]<<" hilo(s)"<<endl;
-        int numThreads = CANT_THREADS[i];
+    for (int numThreads : CANT_THREADS){
+        cout<<"Indice invertido con "<<numThreads<<" hilo(s)"<<endl;
         ejecutar_medir (numThreads, binIndiceInvertidoParalelo,"./resources/libros");
         cout<<endl;
     }
-    ofstream archivo("data/logs2.txt", ios::app);
+    ofstream archivo(rutaLog, ios::app);
     archivo<<endl;
 }
 
 void ejecutar_medir(int nThreads, string bin, string rutaLibros){
-    string nombreIndiceTemp = "test_perf_" + to_string(nThreads);
+    string nombreIndiceTemp = "test_" + to_string(nThreads);
     string comando = "./" + bin + " " + nombreIndiceTemp + " " + rutaLibros + " " + to_string(nThreads) ;
     auto start = std::chrono::high_resolution_clock::now();
 
@@ -49,8 +49,7 @@ void ejecutar_medir(int nThreads, string bin, string rutaLibros){
 
     auto end = std::chrono::high_resolution_clock::now();
     auto duracion_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    cout << "(DEBUG) Duración en MS (bruto): " << duracion_ms.count() << " ms" << endl;
-    saveLog("data/logs2.txt", nThreads, duracion_ms);
+    saveLog(rutaLog, nThreads, duracion_ms);
 
 }
 

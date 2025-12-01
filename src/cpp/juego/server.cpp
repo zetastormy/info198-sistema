@@ -1,6 +1,9 @@
 #include "../include/server.h"
+#include "../include/dotenv.h"
+#include <QCoreApplication>
 #include <QDebug>
 #include <algorithm>
+#include <string>
 
 Server::Server(QObject *parent) : QObject(parent) {
     qInfo().noquote() << "  [Constructor Server] Creando m_tcpServer...";
@@ -15,12 +18,18 @@ Server::Server(QObject *parent) : QObject(parent) {
 }
 
 void Server::startServer() {
-    if (m_tcpServer->listen(QHostAddress::Any, 8080)) {
-        qInfo() << ">>> SERVIDOR INICIADO: Escuchando en el puerto 8080. Esperando conexiones... <<<";
+    QString path = QCoreApplication::applicationDirPath() + "/../.env";
+    dotenv env(path.toStdString());
+
+    // Leemos el puerto o usamos 8020 por defecto si no existe
+    int gamePort = std::stoi(env.get("GAME_PORT", "8020"));
+
+    if (m_tcpServer->listen(QHostAddress::Any, gamePort)) {
+        qInfo() << ">>> SERVIDOR INICIADO: Escuchando en el puerto " << gamePort << ". Esperando conexiones... <<<";
     } else {
         qCritical() << "--- ¡ERROR GRAVE! NO SE PUDO INICIAR EL SERVIDOR: ---";
         qCritical() << m_tcpServer->errorString();
-        qCritical() << "--- Revisa si otro programa (Spotify, Skype, otro juego) usa el puerto 8080 ---";
+        qCritical() << "--- Revisa si otro programa usa el puerto " << gamePort << " ---";
     }
 }
 

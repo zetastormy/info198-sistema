@@ -83,7 +83,11 @@ void search(string query, int cachePort) {
 
         json searchResults = json::parse(rawResults);
 
-        showResults(searchResults);
+        if (searchResults["status"].get<string>() == "ERROR") {
+            cout << "(ERROR) " << searchResults["message"].get<string>() << endl;
+        } else {
+            showResults(searchResults);
+        }
     } else if (bytesRead == 0) {
         cout << "(ERROR) El cliente terminó la conexión abruptamente." << endl;
     } else {
@@ -94,6 +98,7 @@ void search(string query, int cachePort) {
 }
 
 void showResults(json searchResults) {
+    string source = searchResults["source"] == "CACHE" ? "Cache" : "Motor de búsqueda";
     string query = searchResults["query"];
     int topk = searchResults["topk"];
     long lookupTime = searchResults["lookupTime"];
@@ -103,7 +108,12 @@ void showResults(json searchResults) {
         return a["score"] > b["score"];
     });
 
-    cout << "---= " << sortedResults.size() << " RESULTADOS PARA '" << query << "' (" << lookupTime  << "μs) =---" << endl;
+    cout << "---= " << sortedResults.size() << " RESULTADOS PARA '" << query << "' (" << lookupTime  << "μs - " << source << ") =---" << endl;
+
+    if (sortedResults.size() == 0) {
+        cout << "Sin resultados." << endl;
+        return;
+    }
 
     int count = 0;
 

@@ -4,6 +4,7 @@
 #include "../include/dotenv.h"
 #include <QHostAddress>
 #include <QTimer>
+#include <QCoreApplication> // Necesario para applicationDirPath
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), m_server(nullptr) {
     ui->setupUi(this);
@@ -35,21 +36,31 @@ void MainWindow::on_hostButton_clicked() {
         return;
     }
 
+    // 1. Lógica combinada: Configurar Log (Local)
     QString logPath = getLogFilePath(); 
     m_logFile.setFileName(logPath);
     
+    // 2. Lógica combinada: Configurar .env y Puerto (Remoto)
+    QString path = QCoreApplication::applicationDirPath() + "/../.env";
+    dotenv env(path.toStdString());
+    // Leemos el puerto o usamos 8020 por defecto si no existe
+    int gamePort = std::stoi(env.get("GAME_PORT", "8020"));
+
     qDebug() << "Iniciando modo host...";
     if (m_logFile.open(QIODevice::Append | QIODevice::Text)) {
         QTextStream out(&m_logFile);
         out << "--------------------------------------------------\n"; 
         writeToLog("INICIO", "MODO:HOST, IP:127.0.0.1, CREADOR:" + m_playerName);
     }    
+    
     m_server = new Server(this);
     m_server->startServer();
 
     ui->statusbar->showMessage("Creando partida (conectando a 127.0.0.1)...");
+    
     m_connectionTimer->start(10000); 
-    m_socket->connectToHost(QHostAddress("127.0.0.1"), 8080);
+    // Usamos el puerto del .env
+    m_socket->connectToHost(QHostAddress("127.0.0.1"), gamePort);
 
     ui->hostButton->setEnabled(false);
     ui->joinButton->setEnabled(false);
@@ -66,6 +77,7 @@ void MainWindow::on_joinButton_clicked() {
 
     qDebug() << "Iniciando modo cliente, conectando a" << ip;
     
+    // 1. Lógica combinada: Configurar Log (Local)
     QString logPath = getLogFilePath();
     m_logFile.setFileName(logPath);
     if (m_logFile.open(QIODevice::Append | QIODevice::Text)) {
@@ -74,9 +86,16 @@ void MainWindow::on_joinButton_clicked() {
         writeToLog("INICIO", "MODO:CLIENTE, IP:" + ui->ipInput->text() + ", JUGADOR:" + m_playerName);
     }
     
+    // 2. Lógica combinada: Configurar .env y Puerto (Remoto)
+    QString path = QCoreApplication::applicationDirPath() + "/../.env";
+    dotenv env(path.toStdString());
+    int gamePort = std::stoi(env.get("GAME_PORT", "8020"));
+
     ui->statusbar->showMessage("Conectando a " + ip + "...");
+    
     m_connectionTimer->start(10000); 
-    m_socket->connectToHost(QHostAddress(ip), 8080);
+    // Usamos el puerto del .env
+    m_socket->connectToHost(QHostAddress(ip), gamePort);
 
     ui->hostButton->setEnabled(false);
     ui->joinButton->setEnabled(false);

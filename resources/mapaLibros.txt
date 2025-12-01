@@ -1,172 +1,172 @@
-1;10084
-2;1032
-3;1037
-4;1093
-5;1096
-6;1143
-7;1160
-8;1161
-9;1163
-10;1186
-11;1188
-12;1190
-13;1195
-14;1205
-15;1219
-16;1243
-17;1276
-18;1295
-19;1309
-20;1335
-21;1336
-22;1338
-23;1360
-24;1392
-25;1394
-26;1395
-27;1406
-28;1407
-29;1413
-30;1414
-31;1415
-32;1416
-33;1419
-34;1421
-35;1422
-36;1434
-37;1463
-38;1465
-39;1477
-40;1488
-41;1550
-42;1553
-43;1554
-44;1555
-45;1556
-46;1557
-47;1566
-48;1569
-49;1578
-50;1583
-51;1586
-52;1587
-53;1588
-54;1590
-55;1611
-56;1619
-57;1631
-58;1641
-59;1646
-60;1649
-61;1651
-62;1655
-63;1659
-64;1660
-65;1669
-66;1670
-67;1678
-68;1680
-69;1683
-70;1697
-71;1704
-72;1710
-73;1712
-74;1714
-75;1715
-76;1720
-77;1729
-78;1730
-79;1737
-80;1749
-81;1810
-82;1811
-83;1812
-84;1813
-85;1826
-86;1827
-87;1841
-88;1854
-89;1867
-90;1871
-91;1873
-92;1884
-93;1885
-94;1886
-95;1898
-96;1899
-97;1902
-98;1912
-99;1921
-100;1925
-101;1940
-102;1941
-103;1942
-104;1943
-105;1954
-106;1957
-107;1967
-108;1968
-109;1973
-110;1994
-111;2000-0
-112;2002
-113;2012
-114;2021
-115;2022
-116;2037
-117;2038
-118;2051
-119;2052
-120;2060
-121;2064
-122;2176
-123;2231
-124;2303
-125;2304
-126;2305
-127;2308
-128;2318
-129;2366
-130;2369
-131;2422
-132;2425
-133;2427
-134;2429
-135;2445
-136;2452
-137;2458
-138;2460
-139;2468
-140;2469
-141;2506
-142;2519
-143;2521
-144;2522
-145;2534
-146;2540
-147;2559
-148;2566
-149;2572
-150;2573
-151;451
-152;460
-153;469
-154;474
-155;530
-156;535
-157;536
-158;597
-159;608
-160;752
-161;816
-162;820
-163;832
-164;847
-165;877
-166;897
-167;909
-168;947
-169;964
-170;980
-171;985
-172;986
+1;Master and Man
+2;Father Sergius
+3;Alice Adams
+4;The Merry Adventures of Robin Hood
+5;The Life of Horatio Lord Nelson
+6;The Adventures of Colonel Daniel Boone
+7;The Rose and the Ring
+8;Little Britain
+9;Lays of Ancient Rome
+10;Robin Hood
+11;Edison, His Life and Inventions
+12;Democracy In America, Volume 2 (of 2)
+13;A Young Girl's Diary
+14;Areopagitica
+15;Njal's Saga
+16;A Footnote to History
+17;Travels with a Donkey in the Cevennes
+18;Driven From Home
+19;How to Tell Stories to Children
+20;The Duchesse de Langeais
+21;The Dawn of a To-morrow
+22;The Shadow-Line
+23;The Caged Lion
+24;On the Decay of the Art of Lying
+25;How to Fail in Literature
+26;The Forsyte Saga, Volume I.
+27;Father and Son
+28;Eugene Pickering
+29;A Dark Night's Work
+30;Lizzie Leigh
+31;A Popular Account of Dr. Livingstone's Expedition to the Zambesi and Its Tributaries
+32;The Sleeping Car
+33;Repertory of the Comedie Humaine Pt 2
+34;Repertory of the Comedie Humaine Pt 1
+35;The Madonna of the Future
+36;Sermons on the Card and Other Discourses
+37;Shavings
+38;Letters on England
+39;Lost Face
+40;The Patagonia
+41;A Bundle of Letters
+42;Andrew Lang's Introduction to The Compleat Angler
+43;One of Ours
+44;The Beldonald Holbein
+45;Droll Stories, Volume 2
+46;Bunyan Characters - Third Series
+47;A Set of Six
+48;Legends and Lyrics: Second Series
+49;Legends and Lyrics: First Series
+50;All Roads Lead to Calvary
+51;Seven Discourses on Art
+52;A Journey to the Western Isles of Scotland
+53;The History of the Caliph Vathek
+54;Everybody's Business is Nobody's Business
+55;Dickory Cronke
+56;The Lock And Key Library
+57;Novel Notes
+58;Angling Sketches
+59;Nostromo: A Tale of the Seaboard
+60;The Children
+61;Sonnets from the Portuguese
+62;Don Quijote
+63;Adventures among Books
+64;Tales of Troy: Ulysses the Sacker of Cities
+65;The Human Comedy
+66;The Brotherhood of Consolation
+67;Beatrix
+68;Colonel Chabert
+69;Louis Lambert
+70;Rise and Fall of Cesar Birotteau
+71;Letters of Two Brides
+72;Christ in Flanders
+73;Droll Stories, Volume 1
+74;The Chouans
+75;The Muse of the Department
+76;The Old Peabody Pew
+77;The Village Rector
+78;Albert Savarus
+79;Bunyan Characters (Second Series)
+80;Bunyan Characters
+81;The Exiles
+82;Gambara
+83;The Deputy of Arcis
+84;The Diary of a Goose Girl
+85;Catherine de' Medici
+86;Z. Marcas
+87;The Life of Charlotte Bronte - Volume 1
+88;Sarrasine
+89;A Man of Business
+90;A Prince of Bohemia
+91;Massimilla Doni
+92;A Second Home
+93;Cousin Betty
+94;Facino Cane
+95;Michael, Brother of Jerry
+96;The Deserted Woman
+97;The Man Who Knew Too Much
+98;Eugenie Grandet
+99;Another Study of Woman
+100;The Rescue
+101;La Grande Breteche
+102;Pierrette
+103;Madam How and Lady Why
+104;Honorine
+105;At the Sign of the Cat and Racket
+106;An Historical Mystery
+107;The Small Catechism of Martin Luther
+108;The Human Drift
+109;Scenes from a Courtesan's Life
+110;The Girl with the Golden Eyes
+111;The God of His Fathers
+112;The Mystery of Orcival
+113;Ferragus
+114;Roads of Destiny
+115;The Lesser Bourgeoisie
+116;A Monk of Fife
+117;La Celestina
+118;Seventeen
+119;The Amazing Interlude
+120;A Rogue's Life
+121;The Black Robe
+122;Man and Wife
+123;Options
+124;Aucassin and Nicolete
+125;The Lily of the Valley
+126;The Evolution of Modern Medicine
+127;Men of Iron
+128;The Marriage Contract
+129;A Passion in the Desert
+130;Adieu
+131;The Hidden Masterpiece
+132;A Lady of Quality
+133;The True Story of Christopher Columbus
+134;The Toys of Peace
+135;The Wreck of the Golden Mary
+136;The Private Papers of Henry Ryecroft
+137;Essays
+138;Going into Society
+139;Mrs. Lirriper's Legacy
+140;Mugby Junction
+141;Mrs. Lirriper's Lodgings
+142;Doctor Marigold
+143;Somebody's Luggage
+144;Tom Tiddler's Ground
+145;A Message from the Sea
+146;The Perils of Certain English Prisoners
+147;Letters on Literature
+148;The Holly-Tree
+149;The Seven Poor Travellers
+150;Historical Lectures and Essays
+151;Selected Prose of Oscar Wilde
+152;Shelley
+153;The Ancien Regime
+154;The Spirit of Place
+155;Ceres' Runaway
+156;The Rhythm of Life
+157;Hearts of Controversy
+158;An Essay on Comedy
+159;The Colour of Life
+160;Glasses
+161;The Jolly Corner
+162;The Lair of the White Worm
+163;Poems
+164;Adventure
+165;Jerry of the Islands
+166;The Game
+167;Notes on Life and Letters
+168;The Faith of Men
+169;The Beast in the Jungle
+170;The Life of John Bunyan
+171;The Pupil
+172;Kazan
