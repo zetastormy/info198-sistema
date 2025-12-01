@@ -16,6 +16,8 @@ usuarios almacenados.
 - Conteo de palabras en un archivo de texto.
 - Creador de índices invertidos (con o sin paralelización).
 - Juego de dados multijugador.
+- Creación de gráficos para análisis de rendimiento de ciertas funcionalidades.
+- Buscador de libros, de acuerdo a su contenido usando índice invertido.
 
 ## Primeros pasos
 
@@ -24,8 +26,11 @@ usuarios almacenados.
 - Distribución de Linux moderna
 - Bash (>=5.3)
 - GNU Make (>=4.4)
-- CMake (>=4.1.2)
+- CMake (>=4.1)
 - Lenguaje `es_CL.UTF-8` ([Más información](https://wiki.archlinux.org/title/Locale))
+- Python (>=3.13) con pip (>=25.3), instalando las siguientes librerías (con `pip install <librería>`):
+  - `python-dotenv`
+  - `matplotlib`
 
 ### Compilación
 
@@ -44,7 +49,7 @@ Posteriormente, podrá encontrar el ejecutable de cada programa en la carpeta `b
 
 ### Ejecución
 
-Desde el directorio raíz del programa (donde está ubicado el archivo `.env`), usted podrá ejecutar los programas de la siguientes maneras:
+Desde el **directorio raíz** del programa (donde está ubicado el archivo `.env`), usted podrá ejecutar los programas de la siguientes maneras:
 
 - **Administrador de usuarios:**
 
@@ -52,7 +57,7 @@ Desde el directorio raíz del programa (donde está ubicado el archivo `.env`), 
   ./bin/admin_usuarios
   ```
 
-- **Programa principal (contiene todo menos el administrador de usuarios):**
+- **Programa principal (contiene todo menos el administrador de usuarios, servicio de cache y motor de búsqueda):**
 
   ```bash
   ./bin/pgm -u <usuario> -p <contraseña> -f <ruta a texto a evaluar>
@@ -80,6 +85,30 @@ Desde el directorio raíz del programa (donde está ubicado el archivo `.env`), 
 
   ```bash
   ./bin/juego
+  ```
+  
+- **Buscador en libros (debe iniciar servicio de cache y motor de búsqueda para usarlo):**
+
+  ```bash
+  ./bin/search
+  ```
+  
+- **Servicio de cache para búsqueda:**
+
+  ```bash
+  ./bin/cache_service
+  ```
+  
+- **Motor de búsqueda:**
+
+  ```bash
+  ./bin/search_engine "<ruta índice invertido>"
+  ```
+  
+- **Generador de gráficos de rendimiento de creación de índice invertido:**
+
+  ```bash
+  python src/py/graficar_threads.py
   ```
 
 ### Variables de entorno
@@ -122,13 +151,13 @@ El programa dispone de múltiples variables de entorno para facilitar la manipul
 
 - `TOPK`: especifica la cantidad máxima de resultados más relevantes que entregará el motor de búsqueda al realizar una consulta.
 
-- `CARPETA_GRAFICOS`: especifica la carpeta donde se guardarán los gráficos generados por los análisis de rendimiento.
+- `CARPETA_GRAFICOS`: especifica la carpeta donde se guardarán los gráficos generados por los análisis de rendimiento. Por defecto, `data/graphs`.
 
-- `LOG_RENDIMIENTO`: indica la ruta del archivo donde se registrará la información de rendimiento.
+- `LOG_RENDIMIENTO`: indica la ruta del archivo donde se registrará la información de rendimiento. Por defecto, `data/logs/rendimiento.log`.
 
-- `LOG_JUEGO`: indica la ruta del archivo donde se registrará la actividad del juego.
+- `LOG_JUEGO`: indica la ruta del archivo donde se registrará la actividad del juego. Por defecto, `data/logs/juego.log`.
 
-- `LOG_INDICE`: indica la ruta del archivo donde se registrará estadísticas de la creación de índices en paralelo.
+- `LOG_INDICE`: indica la ruta del archivo donde se registrará estadísticas de la creación de índices en paralelo. Por defecto, `data/logs/indice.log`.
 
 ## Uso del sistema
 
