@@ -1,5 +1,6 @@
 #include "../include/dotenv.h"
 #include "../include/json.hpp"
+#include <codecvt>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -73,7 +74,7 @@ int main (int argc, char**argv) {
 
 string buscarTopK(string query, int topK) {
     auto posicionQuery = memoriaIndice.find(query);
-    if ( posicionQuery == memoriaIndice.end()) return "Sin resultados para: " + query;
+    if ( posicionQuery == memoriaIndice.end()) return json::array().dump();
 
     vector<pair<int, int>> listaResultados = posicionQuery -> second;
 
@@ -82,9 +83,9 @@ string buscarTopK(string query, int topK) {
             return a.second > b.second;
         });
 
-    string respuesta = "";
-    int contador = 0;
+    json respuestaJson = json::array();
 
+    int contador = 0;
     for (const auto& par : listaResultados) {
         if (contador >= topK) break;
 
@@ -95,11 +96,16 @@ string buscarTopK(string query, int topK) {
             titulo = baseDatosLibros[idLibro];
         }
 
-        respuesta += "(" + titulo + "," + to_string(par.second) +");";
+        json documento;
+        documento["title"] = titulo;
+        documento["score"] = par.second;
+
+        respuestaJson.push_back(documento);
+
         contador++;
     }
 
-    return respuesta;
+    return respuestaJson.dump();
 }
 
 bool cargarBaseDatosLibros(string rutaArchivo) {
