@@ -6,10 +6,13 @@ from datetime import datetime
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # --- CONFIGURACIÓN ---
-NOMBRE_JUGADOR_OBJETIVO = "mayra"  # El nombre a buscar (substring)
-ARCHIVO_OBJETIVO = "data/historial_global.txt"
+NOMBRE_JUGADOR_OBJETIVO = ""  # El nombre a buscar (substring)
+ARCHIVO_OBJETIVO = os.getenv("LOG_JUEGO", "data/logs/juego.log")
 
 
 def log_debug(mensaje):
@@ -189,16 +192,16 @@ def procesar_log(ruta_log):
             df["Details"].str.contains("desconectado", case=False, na=False).sum()
         )
 
-        # Conteo inteligente de veces que ganó la Mayra
-        wins_mayra = 0
+        # Conteo inteligente de veces que ganó el jugador
+        wins_jugador = 0
         obj = NOMBRE_JUGADOR_OBJETIVO.lower()
         for det in df["Details"]:
             det_l = det.lower()
             if "victoria_player" in det_l and obj in det_l:
-                wins_mayra += 1
+                wins_jugador += 1
             # Fallback para game_over
             elif "game_over" in det_l and obj in det_l:
-                wins_mayra += 1
+                wins_jugador += 1
 
         # Generar gráfico de barras
         categorias = [
@@ -207,7 +210,7 @@ def procesar_log(ruta_log):
             "Desconexiones",
             f'Victorias\n"{NOMBRE_JUGADOR_OBJETIVO}"',
         ]
-        valores = [total_partidas, total_turnos, desconexiones, wins_mayra]
+        valores = [total_partidas, total_turnos, desconexiones, wins_jugador]
 
         plt.figure(figsize=(10, 6))
         bars = plt.bar(
@@ -245,10 +248,17 @@ def procesar_log(ruta_log):
 
 if __name__ == "__main__":
     try:
-        arch = "data/historial_global.txt"
-        if len(sys.argv) > 1:
-            arch = sys.argv[1]
-        procesar_log(arch)
+        pid = os.getpid()
+
+        print(f"---= GENERADOR DE GRÁFICO DE ESTADÍSTICAS DE JUEGO (PID: {pid}) =---")
+
+        NOMBRE_JUGADOR_OBJETIVO = input(
+            "Ingresa un jugador objetivo para graficar sus estadísticas: "
+        )
+
+        procesar_log(ARCHIVO_OBJETIVO)
+
+        print("Gráficos generados.")
     except Exception as e:
         log_debug(f"CRASH: {e}")
         log_debug(traceback.format_exc())

@@ -4,7 +4,8 @@
 #include "../include/dotenv.h"
 #include <QHostAddress>
 #include <QTimer>
-#include <QCoreApplication> 
+#include <QCoreApplication>
+#include <QFileInfo> // <-- Necesario para manejar rutas de archivos
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), m_server(nullptr) {
     ui->setupUi(this);
@@ -36,11 +37,9 @@ void MainWindow::on_hostButton_clicked() {
         return;
     }
 
-    // 1. Lógica combinada: Configurar Log (Local)
-    QString logPath = getLogFilePath(); 
+    QString logPath = getLogFilePath();
     m_logFile.setFileName(logPath);
-    
-    // 2. Lógica combinada: Configurar .env y Puerto (Remoto)
+
     QString path = QCoreApplication::applicationDirPath() + "/../.env";
     dotenv env(path.toStdString());
     // Leemos el puerto o usamos 8020 por defecto si no existe
@@ -49,16 +48,16 @@ void MainWindow::on_hostButton_clicked() {
     qDebug() << "Iniciando modo host...";
     if (m_logFile.open(QIODevice::Append | QIODevice::Text)) {
         QTextStream out(&m_logFile);
-        out << "--------------------------------------------------\n"; 
+        out << "--------------------------------------------------\n";
         writeToLog("INICIO", "MODO:HOST, IP:127.0.0.1, CREADOR:" + m_playerName);
-    }    
-    
+    }
+
     m_server = new Server(this);
     m_server->startServer();
 
     ui->statusbar->showMessage("Creando partida (conectando a 127.0.0.1)...");
-    
-    m_connectionTimer->start(10000); 
+
+    m_connectionTimer->start(10000);
     // Usamos el puerto del .env
     m_socket->connectToHost(QHostAddress("127.0.0.1"), gamePort);
 
@@ -76,8 +75,7 @@ void MainWindow::on_joinButton_clicked() {
     }
 
     qDebug() << "Iniciando modo cliente, conectando a" << ip;
-    
-    // 1. Lógica combinada: Configurar Log (Local)
+
     QString logPath = getLogFilePath();
     m_logFile.setFileName(logPath);
     if (m_logFile.open(QIODevice::Append | QIODevice::Text)) {
@@ -85,15 +83,14 @@ void MainWindow::on_joinButton_clicked() {
         out << "--------------------------------------------------\n";
         writeToLog("INICIO", "MODO:CLIENTE, IP:" + ui->ipInput->text() + ", JUGADOR:" + m_playerName);
     }
-    
-    // 2. Lógica combinada: Configurar .env y Puerto (Remoto)
+
     QString path = QCoreApplication::applicationDirPath() + "/../.env";
     dotenv env(path.toStdString());
     int gamePort = std::stoi(env.get("GAME_PORT", "8020"));
 
     ui->statusbar->showMessage("Conectando a " + ip + "...");
-    
-    m_connectionTimer->start(10000); 
+
+    m_connectionTimer->start(10000);
     // Usamos el puerto del .env
     m_socket->connectToHost(QHostAddress(ip), gamePort);
 
@@ -176,19 +173,39 @@ void MainWindow::onSocketDisconnected() {
     ui->stackedWidget->setCurrentIndex(0);
 }
 void MainWindow::closeEvent(QCloseEvent *event) {
-    runGraphScript(); 
-    event->accept();  
+    runGraphScript();
+    event->accept();
 }
 
 QString MainWindow::getLogFilePath() {
-    QDir dataDir("data");
-    if (!dataDir.exists()) QDir().mkpath("data");
-    
-    if (!dataDir.exists()) {
-        QDir().mkpath("data"); 
-        qDebug() << "Carpeta 'data' creada.";
+    QString envPath = QCoreApplication::applicationDirPath() + "/../.env";
+    dotenv env(envPath.toStdString());
+
+    // Obtenemos la ruta desde la variable de entorno LOG_JUEGO
+    std::string logPathStr = env.get("LOG_JUEGO");
+    QString logPath;
+
+    if (logPathStr.empty()) {
+        // Valor por defecto si no existe la variable
+        logPath = "data/logs/juego.log";
+        qDebug() << "Variable LOG_JUEGO no encontrada, usando por defecto:" << logPath;
+    } else {
+        logPath = QString::fromStdString(logPathStr);
     }
-    return "data/historial_global.txt"; 
+
+    // Aseguramos que el directorio exista
+    QFileInfo fileInfo(logPath);
+    QDir dir = fileInfo.dir(); // Obtiene el directorio del archivo
+
+    if (!dir.exists()) {
+        if (dir.mkpath(".")) {
+            qDebug() << "Carpeta creada para el log:" << dir.path();
+        } else {
+            qCritical() << "Error al crear la carpeta para el log:" << dir.path();
+        }
+    }
+
+    return logPath;
 }
 
 
@@ -206,8 +223,8 @@ void MainWindow::runGraphScript() {
     } else {
         qDebug() << "No se encontró GRAPH_OUTPUT_DIR en .env, Python usará su ruta por defecto.";
     }
-    
-    QString scriptPath = "src/py/graph.py";
+
+    QString scriptPath = "src/py/graficar_juego.py";
     QString csvPath = "data/historial_global.txt";
 
     qDebug() << "Ejecutando:" << scriptPath << "con datos en:" << csvPath;
@@ -216,7 +233,7 @@ void MainWindow::runGraphScript() {
     QStringList arguments;
     arguments << scriptPath << csvPath;
     bool exito = QProcess::startDetached(program, arguments, QDir::currentPath());
-    
+
     if (exito) {
         qDebug() << "ÉXITO: El sistema aceptó el comando para lanzar Python.";
     } else {
@@ -399,12 +416,12 @@ void MainWindow::onSocketReadyRead() {
             if (logMsg.contains("lanzó un")) {
                     writeToLog("TURNO", logMsg);
                 } else {
-                    writeToLog("INFO", logMsg); 
+                    writeToLog("INFO", logMsg);
                 }
             ui->logDisplay->append(logMsg);
         } else if (message.startsWith("GAME_OVER:")) {
             QString winner = message.section(':', 1);
-            
+
             ui->winnerLabel->setText("¡El equipo '" + winner + "' ha ganado!");
             ui->nextTurnButton->setEnabled(false);
             ui->stackedWidget->setCurrentIndex(3);
@@ -429,6 +446,6 @@ void MainWindow::onSocketReadyRead() {
                 ui->turnStatusLabel->setText("Turno de: " + currentPlayer);
                 ui->turnStatusLabel->setStyleSheet("background-color: #F44336; color: white; padding: 5px; border-radius: 5px;");
             }
-        } 
+        }
     }
 }
