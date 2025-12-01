@@ -133,7 +133,7 @@ void MainWindow::on_lobbyButton_clicked() {
 }
 
 void MainWindow::on_exitButton_ConnectionPage_clicked() {
-    runGraphScript();
+    //runGraphScript();
     qDebug() << "Botón Salir (Inicio) presionado. Cerrando la aplicación.";
     this->close();
 }
@@ -173,7 +173,7 @@ void MainWindow::onSocketDisconnected() {
     ui->stackedWidget->setCurrentIndex(0);
 }
 void MainWindow::closeEvent(QCloseEvent *event) {
-    runGraphScript();
+    //runGraphScript();
     event->accept();
 }
 
