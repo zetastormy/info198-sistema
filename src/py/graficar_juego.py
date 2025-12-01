@@ -11,8 +11,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # --- CONFIGURACIÓN ---
-NOMBRE_JUGADOR_OBJETIVO = ""  # El nombre a buscar (substring)
-ARCHIVO_OBJETIVO = os.getenv("LOG_JUEGO", "data/logs/juego.log")
+NOMBRE_JUGADOR_OBJETIVO = ""  # Se sobrescribe con input
+ARCHIVO_OBJETIVO = os.getenv("LOG_JUEGO", "data/historial_global.txt")
 
 
 def log_debug(mensaje):
@@ -184,7 +184,7 @@ def procesar_log(ruta_log):
         except Exception as e:
             log_debug(f"Error graficando Carrera: {e}")
 
-    # 4. Resumen Estadístico (GRÁFICO DE BARRAS)
+    # 4. Resumen Estadístico
     try:
         total_partidas = len(indices_inicio)
         total_turnos = len(df_jugadas)
@@ -192,16 +192,45 @@ def procesar_log(ruta_log):
             df["Details"].str.contains("desconectado", case=False, na=False).sum()
         )
 
-        # Conteo inteligente de veces que ganó el jugador
         wins_jugador = 0
-        obj = NOMBRE_JUGADOR_OBJETIVO.lower()
-        for det in df["Details"]:
-            det_l = det.lower()
-            if "victoria_player" in det_l and obj in det_l:
-                wins_jugador += 1
-            # Fallback para game_over
-            elif "game_over" in det_l and obj in det_l:
-                wins_jugador += 1
+        obj = NOMBRE_JUGADOR_OBJETIVO.strip().lower()
+        ultimo_mapa_equipos = {}  # Mapa Jugador -> Equipo
+
+        # Recorremos el log cronológicamente para saber en qué equipo estaba el jugador en cada momento
+        for idx, row in df.iterrows():
+            evt = row["EventType"]
+            det = str(row["Details"])
+
+            # Actualizar mapa de equipos con LOBBY_STATE
+            if evt == "LOBBY_STATE":
+                try:
+                    equipos_raw = det.split(";")
+                    for eq_raw in equipos_raw:
+                        if ":" in eq_raw:
+                            nombre_equipo, jugadores_str = eq_raw.split(":")
+                            lista_jugadores = jugadores_str.split(",")
+                            for jug in lista_jugadores:
+                                ultimo_mapa_equipos[jug.strip().lower()] = (
+                                    nombre_equipo.strip().lower()
+                                )
+                except:
+                    pass  # Si el formato está mal, ignoramos esa línea
+
+            if "ha ganado" in det.lower():
+                match_win = re.search(
+                    r"¡¡¡El equipo (.+) ha ganado!!!", det, re.IGNORECASE
+                )
+                if match_win:
+                    equipo_ganador = match_win.group(1).strip().lower()
+
+                    # Verificamos si el jugador objetivo pertenece a ese equipo ganador
+                    equipo_del_jugador = ultimo_mapa_equipos.get(obj, "")
+
+                    if equipo_del_jugador == equipo_ganador:
+                        wins_jugador += 1
+                        log_debug(
+                            f"Victoria detectada para {obj} en equipo {equipo_ganador} (Índice {idx})"
+                        )
 
         # Generar gráfico de barras
         categorias = [
@@ -242,6 +271,7 @@ def procesar_log(ruta_log):
         plt.close()
     except Exception as e:
         log_debug(f"Error graficando Resumen: {e}")
+        log_debug(traceback.format_exc())
 
     log_debug("¡GENERACIÓN COMPLETA!")
 
@@ -251,6 +281,10 @@ if __name__ == "__main__":
         pid = os.getpid()
 
         print(f"---= GENERADOR DE GRÁFICO DE ESTADÍSTICAS DE JUEGO (PID: {pid}) =---")
+
+        if len(sys.argv) > 1:
+            ARCHIVO_OBJETIVO = sys.argv[1]
+            print(f"Usando archivo de log proporcionado: {ARCHIVO_OBJETIVO}")
 
         NOMBRE_JUGADOR_OBJETIVO = input(
             "Ingresa un jugador objetivo para graficar sus estadísticas: "
