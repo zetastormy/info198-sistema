@@ -70,6 +70,12 @@ def dibujar_grafico(ejecuciones, ruta_salida: Path):
 
 
 def main():
+    pid = os.getpid()
+
+    print(
+        f"---= GENERADOR DE GRÁFICO DE RENDIMIENTO DE ÍNDICE INVERTIDO PARALELO (PID: {pid}) =---"
+    )
+
     print("Generando gráfico de tiempo vs threads...")
     ruta_salida = (
         salida / nombre_archivo
