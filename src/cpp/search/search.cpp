@@ -110,6 +110,11 @@ void showResults(json searchResults) {
 
     cout << "---= " << sortedResults.size() << " RESULTADOS PARA '" << query << "' (" << lookupTime  << "μs - " << source << ") =---" << endl;
 
+    if (sortedResults.size() == 0) {
+        cout << "Sin resultados." << endl;
+        return;
+    }
+
     int count = 0;
 
     for (const auto& result : sortedResults) {
