@@ -425,8 +425,8 @@ void MainWindow::onSocketReadyRead() {
             ui->winnerLabel->setText("¡El equipo '" + winner + "' ha ganado!");
             ui->nextTurnButton->setEnabled(false);
             ui->stackedWidget->setCurrentIndex(3);
-            qDebug() << "Juego terminado. Generando gráficos...";
-            runGraphScript();
+            //qDebug() << "Juego terminado. Generando gráficos...";
+            //runGraphScript();
         } else if (message.startsWith("TURN:")) {
             QString currentPlayer = message.section(':', 1, 1);
             QString nextPlayer = message.section(':', 2, 2);
