@@ -98,6 +98,7 @@ void search(string query, int cachePort) {
 }
 
 void showResults(json searchResults) {
+    string source = searchResults["source"] == "CACHE" ? "Cache" : "Motor de búsqueda";
     string query = searchResults["query"];
     int topk = searchResults["topk"];
     long lookupTime = searchResults["lookupTime"];
@@ -107,7 +108,7 @@ void showResults(json searchResults) {
         return a["score"] > b["score"];
     });
 
-    cout << "---= " << sortedResults.size() << " RESULTADOS PARA '" << query << "' (" << lookupTime  << "μs) =---" << endl;
+    cout << "---= " << sortedResults.size() << " RESULTADOS PARA '" << query << "' (" << lookupTime  << "μs - " << source << ") =---" << endl;
 
     int count = 0;
 

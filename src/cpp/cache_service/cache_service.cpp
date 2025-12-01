@@ -1,7 +1,6 @@
 #include "../include/dotenv.h"
 #include "../include/json.hpp"
 #include <string>
-#include <string.h>
 #include <unistd.h>
 #include <unordered_map>
 #include <deque>
@@ -94,6 +93,7 @@ json lookupResult(string query, int topk, deque<string> &queryCache, unordered_m
     response["topk"] = topk;
 
     if (resultsCache.count(query) != 0) {
+        response["source"] = "CACHE";
         response["results"] = resultsCache[query];
 
         auto lookupEnd = high_resolution_clock::now();
@@ -106,6 +106,7 @@ json lookupResult(string query, int topk, deque<string> &queryCache, unordered_m
     }
 
     json engineResponse(searchEngineLookup(query, searchPort));
+    response["source"] = "SEARCH_ENGINE";
 
     if (engineResponse["status"].get<string>() == "ERROR") {
         response["status"] = "ERROR";
