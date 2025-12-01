@@ -60,9 +60,16 @@ def procesar_log(ruta_log):
     log_debug(f"GENERANDO ESTADÍSTICAS GLOBALES. Ruta: {ruta_log}")
 
     base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    output_dir = os.path.join(base_dir, "graficos")
-    if not os.path.exists(output_dir): os.makedirs(output_dir)
-
+    ruta_default = os.path.join(base_dir, "graficos")
+    output_dir = os.getenv('CARPETA_GRAFICOS', ruta_default)
+    log_debug(f"Carpeta de salida configurada: {output_dir}")
+    if not os.path.exists(output_dir): 
+        try:
+            os.makedirs(output_dir)
+        except Exception as e:
+            log_debug(f"ERROR: No se pudo crear la carpeta {output_dir}: {e}")
+            return
+    
     try:
         df = leer_log_robust(ruta_log)
         if df.empty:

@@ -4,7 +4,7 @@
 #include "../include/dotenv.h"
 #include <QHostAddress>
 #include <QTimer>
-#include <QCoreApplication> // Necesario para applicationDirPath
+#include <QCoreApplication> 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow), m_server(nullptr) {
     ui->setupUi(this);
@@ -197,7 +197,16 @@ void MainWindow::runGraphScript() {
         m_logFile.flush();
         m_logFile.close();
     }
-
+    QString envPath = QCoreApplication::applicationDirPath() + "/../.env";
+    dotenv env(envPath.toStdString());
+    std::string graphDirEnv = env.get("CARPETA_GRAFICOS", "");
+    if (!graphDirEnv.empty()) {
+        qputenv("GRAPH_OUTPUT_DIR", QByteArray::fromStdString(graphDirEnv));
+        qDebug() << "Variable de entorno GRAPH_OUTPUT_DIR configurada a:" << QString::fromStdString(graphDirEnv);
+    } else {
+        qDebug() << "No se encontró GRAPH_OUTPUT_DIR en .env, Python usará su ruta por defecto.";
+    }
+    
     QString scriptPath = "src/py/graph.py";
     QString csvPath = "data/historial_global.txt";
 
@@ -211,7 +220,7 @@ void MainWindow::runGraphScript() {
     if (exito) {
         qDebug() << "ÉXITO: El sistema aceptó el comando para lanzar Python.";
     } else {
-        qCritical() << "ERROR: No se pudo lanzar Python. ¿Tienes 'python3' instalado? ¿La ruta es correcta?";
+        qCritical() << "ERROR: No se pudo lanzar Python.";
     }
 }
 
