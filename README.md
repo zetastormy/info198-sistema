@@ -31,6 +31,7 @@ usuarios almacenados.
 - Python (>=3.13) con pip (>=25.3), instalando las siguientes librerías (con `pip install <librería>`):
   - `python-dotenv`
   - `matplotlib`
+  - `pandas`
 
 ### Compilación
 
@@ -109,6 +110,12 @@ Desde el **directorio raíz** del programa (donde está ubicado el archivo `.env
 
   ```bash
   python src/py/graficar_threads.py
+  ```
+  
+- **Generador de gráficos de estadísticas de juego:**
+
+  ```bash
+  python src/py/graficar_juego.py
   ```
 
 ### Variables de entorno
