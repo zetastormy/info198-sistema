@@ -7,6 +7,13 @@
 #include <QProgressBar>
 #include <QLabel>
 #include "server.h"
+#include <QFile>
+#include <QTextStream>
+#include <QDateTime>
+#include <QProcess>
+#include <QCloseEvent>
+#include <QDir>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -15,6 +22,9 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+protected: 
+    void closeEvent(QCloseEvent *event) override;
+    
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
@@ -29,7 +39,6 @@ private slots:
     void on_hostButton_clicked();
     void on_joinButton_clicked();
 
-    // Slots para la red
     void onSocketConnected();
     void onSocketReadyRead();
     void onSocketDisconnected();
@@ -37,14 +46,17 @@ private slots:
     void onConnectionTimeout();
 
 private:
+    QString getLogFilePath();
+    QFile m_logFile;
     Ui::MainWindow *ui;
     QTcpSocket* m_socket;
     QString m_playerName;
     QTimer *m_connectionTimer;
     bool m_isAdmin = false;
-
+    void runGraphScript();
     QList<QLabel*> m_teamLabels;
     QList<QProgressBar*> m_teamProgressBars;
     Server* m_server;
     void clearGameWidgets();
+    void writeToLog(const QString &eventType, const QString &details);
 };

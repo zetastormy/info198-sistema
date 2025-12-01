@@ -135,10 +135,9 @@ void Server::processMessage(QTcpSocket* client, const QString& message) {
             sendToAll(teamList);
 
             std::string s_currentPlayer = m_game.getCurrentPlayerName();
-            std::string s_nextPlayer = m_game.getNextPlayerName(); // <-- NUEVO
+            std::string s_nextPlayer = m_game.getNextPlayerName();
 
             sendToAll("LOG:¡Juego iniciado! Es el turno de " + QString::fromStdString(s_currentPlayer) + ".\n");
-
             sendToAll("TURN:" + QString::fromStdString(s_currentPlayer) + ":" + QString::fromStdString(s_nextPlayer) + "\n");
         } else {
             qDebug() << "Falló el inicio del juego:" << QString::fromStdString(startResult);
@@ -178,8 +177,22 @@ void Server::processMessage(QTcpSocket* client, const QString& message) {
 
         if (!m_game.isGameActive()) {
             qDebug() << "El juego ha terminado.";
-            sendToAll("GAME_OVER:" + QString::fromStdString(m_game.getWinnerName()) + "\n");
-
+            
+            // Declaramos el nombre del ganador antes de usarlo
+            std::string winnerName = m_game.getWinnerName();
+            
+            sendToAll("GAME_OVER:" + QString::fromStdString(winnerName) + "\n");
+            
+            const auto& allTeams = m_game.getTeams();
+            for (const auto& team : allTeams) {
+                if (team.name == winnerName) {
+                    // Encontramos al equipo ganador, ahora listamos a sus jugadores
+                    for (const auto& player : team.members) {
+                        sendToAll("LOG:VICTORIA_PLAYER:" + QString::fromStdString(player.name) + "\n");
+                    }
+                    break; 
+                }
+            }
             broadcastLobbyUpdate();
         } else {
             std::string s_currentPlayer = m_game.getCurrentPlayerName();
@@ -195,45 +208,77 @@ void Server::onClientDisconnected() {
     if (!clientSocket) return;
 
     QString playerName = m_clientConnections.value(clientSocket, "Desconocido");
-    qDebug() << playerName << "se ha desconectado.";
+
+    // Lógica de cierre total si es el ADMIN
+    if (clientSocket == m_admin) {
+        qDebug() << "¡El ANFITRIÓN (" << playerName << ") se desconectó! Cerrando todo.";
+
+        sendToAll("LOG: El anfitrión cerró la sala. La partida ha terminado.\n");
+        sendToAll("ERROR:El anfitrión se ha desconectado. \n");
+
+        auto todosLosClientes = m_clientConnections.keys();
+        for (QTcpSocket* socket : todosLosClientes) {
+            if (socket != clientSocket) {
+                socket->disconnectFromHost(); 
+            }
+        }
+
+        m_clientConnections.clear();
+        m_lobbyTeams.clear();
+        m_game = Game();
+        m_admin = nullptr;
+
+        clientSocket->deleteLater();
+        return;
+    }
+
+    std::string s_name = playerName.toStdString();
+
+    // Manejo de juego activo (Jugador normal se va)
+    if (m_game.isGameActive()) {
+        int result = m_game.removePlayer(s_name);
+        sendToAll("LOG: El jugador " + playerName + " se ha desconectado.\n");
+
+        if (result == 3) { 
+            std::string winner = m_game.getTeams()[0].name;
+            sendToAll("LOG:¡El equipo rival se ha rendido/desconectado!\n");
+            sendToAll("GAME_OVER:" + QString::fromStdString(winner) + "\n");
+            m_game = Game();
+            broadcastLobbyUpdate();
+        } 
+        else {
+            if (result == 1) sendToAll("LOG: Un equipo ha sido eliminado.\n");
+            else if (result == 2) sendToAll("LOG: Era su turno -> Pasa al siguiente.\n");
+            
+            std::string s_curr = m_game.getCurrentPlayerName();
+            std::string s_next = m_game.getNextPlayerName();
+            sendToAll("TURN:" + QString::fromStdString(s_curr) + ":" + QString::fromStdString(s_next) + "\n");
+        }
+    }
+
+    // Limpieza de Lobby y memoria
+    m_clientConnections.remove(clientSocket);
+    qDebug() << playerName << "se ha desconectado (Jugador común).";
 
     std::string s_playerName = playerName.toStdString();
     for (auto it_team = m_lobbyTeams.begin(); it_team != m_lobbyTeams.end(); ) {
         auto& members = it_team->second.members;
         auto it_player = std::remove_if(members.begin(), members.end(),
-                                        [&s_playerName](const Player& player) {
-                                            return player.name == s_playerName;
-                                        });
-
+                                        [&s_playerName](const Player& player) { return player.name == s_playerName; });
         if (it_player != members.end()) {
             members.erase(it_player, members.end());
-            qDebug() << "  > (Limpiando) " << playerName << " eliminado del equipo " << QString::fromStdString(it_team->first);
-
-            if (it_team->second.members.empty()) {
-                qDebug() << "  > (Limpiando) Equipo " << QString::fromStdString(it_team->first) << " está vacío. Borrando.";
-                it_team = m_lobbyTeams.erase(it_team);
-            } else {
-                ++it_team;
-            }
+            if (it_team->second.members.empty()) it_team = m_lobbyTeams.erase(it_team);
+            else ++it_team;
         } else {
             ++it_team;
         }
     }
 
-    m_clientConnections.remove(clientSocket);
-
-    if (m_admin == clientSocket) {
-        qDebug() << "¡El anfitrión se ha desconectado!";
-        m_admin = nullptr;
-        if (!m_clientConnections.isEmpty()) {
-            m_admin = m_clientConnections.firstKey();
-            qDebug() << "Nuevo anfitrión es:" << m_clientConnections.value(m_admin);
-
-            m_admin->write("PROMOTION:ADMIN\n");
-        }
+    if (!m_clientConnections.isEmpty()) {
+        broadcastLobbyUpdate();
     }
 
-    broadcastLobbyUpdate();
+    clientSocket->deleteLater();
 }
 
 void Server::broadcastLobbyUpdate() {

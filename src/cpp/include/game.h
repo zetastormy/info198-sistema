@@ -16,7 +16,7 @@ public:
     std::string getCurrentPlayerName() const;
     void addTeam(const Team& team);
     bool canStart() const;
-
+    int removePlayer(const std::string& playerName);
     std::string start();
     std::string nextTurn();
     bool isGameActive() const;

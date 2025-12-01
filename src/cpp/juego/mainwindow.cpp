@@ -35,15 +35,20 @@ void MainWindow::on_hostButton_clicked() {
         return;
     }
 
-    QString path = QCoreApplication::applicationDirPath() + "/../.env";
-    dotenv env(path.toStdString());
-
+    QString logPath = getLogFilePath(); 
+    m_logFile.setFileName(logPath);
+    
     qDebug() << "Iniciando modo host...";
+    if (m_logFile.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&m_logFile);
+        out << "--------------------------------------------------\n"; 
+        writeToLog("INICIO", "MODO:HOST, IP:127.0.0.1, CREADOR:" + m_playerName);
+    }    
     m_server = new Server(this);
     m_server->startServer();
 
     ui->statusbar->showMessage("Creando partida (conectando a 127.0.0.1)...");
-    m_connectionTimer->start(10000); // 10 segundos de tiempo límite
+    m_connectionTimer->start(10000); 
     m_socket->connectToHost(QHostAddress("127.0.0.1"), 8080);
 
     ui->hostButton->setEnabled(false);
@@ -60,9 +65,17 @@ void MainWindow::on_joinButton_clicked() {
     }
 
     qDebug() << "Iniciando modo cliente, conectando a" << ip;
-
+    
+    QString logPath = getLogFilePath();
+    m_logFile.setFileName(logPath);
+    if (m_logFile.open(QIODevice::Append | QIODevice::Text)) {
+        QTextStream out(&m_logFile);
+        out << "--------------------------------------------------\n";
+        writeToLog("INICIO", "MODO:CLIENTE, IP:" + ui->ipInput->text() + ", JUGADOR:" + m_playerName);
+    }
+    
     ui->statusbar->showMessage("Conectando a " + ip + "...");
-    m_connectionTimer->start(10000); // 10 segundos de tiempo límite
+    m_connectionTimer->start(10000); 
     m_socket->connectToHost(QHostAddress(ip), 8080);
 
     ui->hostButton->setEnabled(false);
@@ -85,6 +98,16 @@ void MainWindow::on_startGameButton_clicked() {
     ui->startGameButton->setEnabled(false);
 }
 
+void MainWindow::writeToLog(const QString &eventType, const QString &details) {
+        if (!m_logFile.isOpen()) return;
+
+        QTextStream out(&m_logFile);
+        out << QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm:ss") << ","
+            << eventType << ","
+            << details << "\n";
+        m_logFile.flush();
+}
+
 void MainWindow::on_nextTurnButton_clicked() {
     m_socket->write("NEXT_TURN\n");
 }
@@ -94,6 +117,7 @@ void MainWindow::on_lobbyButton_clicked() {
 }
 
 void MainWindow::on_exitButton_ConnectionPage_clicked() {
+    runGraphScript();
     qDebug() << "Botón Salir (Inicio) presionado. Cerrando la aplicación.";
     this->close();
 }
@@ -124,13 +148,54 @@ void MainWindow::onSocketDisconnected() {
 
     if (m_server) {
         qDebug() << "Cerrando el servidor local.";
-        delete m_server;
+        m_server->disconnect();
+        m_server->deleteLater();
         m_server = nullptr;
     }
 
     m_isAdmin = false;
     ui->stackedWidget->setCurrentIndex(0);
 }
+void MainWindow::closeEvent(QCloseEvent *event) {
+    runGraphScript(); 
+    event->accept();  
+}
+
+QString MainWindow::getLogFilePath() {
+    QDir dataDir("data");
+    if (!dataDir.exists()) QDir().mkpath("data");
+    
+    if (!dataDir.exists()) {
+        QDir().mkpath("data"); 
+        qDebug() << "Carpeta 'data' creada.";
+    }
+    return "data/historial_global.txt"; 
+}
+
+
+void MainWindow::runGraphScript() {
+    if (m_logFile.isOpen()) {
+        m_logFile.flush();
+        m_logFile.close();
+    }
+
+    QString scriptPath = "src/py/graph.py";
+    QString csvPath = "data/historial_global.txt";
+
+    qDebug() << "Ejecutando:" << scriptPath << "con datos en:" << csvPath;
+
+    QString program = "python3";
+    QStringList arguments;
+    arguments << scriptPath << csvPath;
+    bool exito = QProcess::startDetached(program, arguments, QDir::currentPath());
+    
+    if (exito) {
+        qDebug() << "ÉXITO: El sistema aceptó el comando para lanzar Python.";
+    } else {
+        qCritical() << "ERROR: No se pudo lanzar Python. ¿Tienes 'python3' instalado? ¿La ruta es correcta?";
+    }
+}
+
 
 void MainWindow::onConnectionTimeout() {
     qDebug() << "¡Timeout de conexión!";
@@ -197,7 +262,7 @@ void MainWindow::onSocketReadyRead() {
             ui->lobbyDisplay->append("--- Estado del Lobby ---");
 
             QStringList teams = data.split(';', Qt::SkipEmptyParts);
-
+            writeToLog("LOBBY_STATE", data);
             int teamCount = teams.size();
             bool canStart = true;
 
@@ -303,13 +368,20 @@ void MainWindow::onSocketReadyRead() {
             QString logMsg = message.section(':', 1);
 
             logMsg.replace("|", "\n");
-
+            if (logMsg.contains("lanzó un")) {
+                    writeToLog("TURNO", logMsg);
+                } else {
+                    writeToLog("INFO", logMsg); 
+                }
             ui->logDisplay->append(logMsg);
         } else if (message.startsWith("GAME_OVER:")) {
             QString winner = message.section(':', 1);
-
+            
             ui->winnerLabel->setText("¡El equipo '" + winner + "' ha ganado!");
+            ui->nextTurnButton->setEnabled(false);
             ui->stackedWidget->setCurrentIndex(3);
+            qDebug() << "Juego terminado. Generando gráficos...";
+            runGraphScript();
         } else if (message.startsWith("TURN:")) {
             QString currentPlayer = message.section(':', 1, 1);
             QString nextPlayer = message.section(':', 2, 2);
@@ -329,14 +401,6 @@ void MainWindow::onSocketReadyRead() {
                 ui->turnStatusLabel->setText("Turno de: " + currentPlayer);
                 ui->turnStatusLabel->setStyleSheet("background-color: #F44336; color: white; padding: 5px; border-radius: 5px;");
             }
-        } else if (message.startsWith("GAME_OVER:")) {
-            QString winner = message.section(':', 1);
-
-            ui->winnerLabel->setText("¡El equipo '" + winner + "' ha ganado!");
-
-            ui->nextTurnButton->setEnabled(false);
-
-            ui->stackedWidget->setCurrentIndex(3);
-        }
+        } 
     }
 }
