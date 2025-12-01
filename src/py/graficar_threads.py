@@ -1,15 +1,23 @@
 #!/usr/bin/env python3
+import os
 from pathlib import Path
-import matplotlib.pyplot as plt
-from matplotlib.ticker import MaxNLocator # para forzar que los valores del ejex sean enteros
 
-entrada = Path("data/logs2.txt")
-salida = Path("data/graphs")
+import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+from matplotlib.ticker import (
+    MaxNLocator,  # para forzar que los valores del ejex sean enteros
+)
+
+load_dotenv()
+
+entrada = Path(os.getenv("LOG_RENDIMIENTO"))
+salida = Path(os.getenv("CARPETA_GRAFICOS"))
 nombre_archivo = "tiempo_vs_threads.png"
 
 
-def leer_registros(ruta_logs: Path): # leer el archivo de logs y devolver una lista de tuplas (hilos, tiempos) para el gráfico
-
+def leer_registros(
+    ruta_logs: Path,
+):  # leer el archivo de logs y devolver una lista de tuplas (hilos, tiempos) para el gráfico
     ejecuciones = []
     hilos = []
     tiempos = []
@@ -49,7 +57,9 @@ def dibujar_grafico(ejecuciones, ruta_salida: Path):
     plt.ylabel("Tiempo (ms)")
     plt.title("Tiempo vs Threads")
     plt.grid(True, linestyle="--", alpha=0.5)
-    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))  # forzar que los valores del ejex sean enteros
+    plt.gca().xaxis.set_major_locator(
+        MaxNLocator(integer=True)
+    )  # forzar que los valores del ejex sean enteros
 
     if len(ejecuciones) > 1:
         plt.legend()
@@ -61,7 +71,9 @@ def dibujar_grafico(ejecuciones, ruta_salida: Path):
 
 def main():
     print("Generando gráfico de tiempo vs threads...")
-    ruta_salida = salida / nombre_archivo # junta la ruta de salida con el nombre del archivo
+    ruta_salida = (
+        salida / nombre_archivo
+    )  # junta la ruta de salida con el nombre del archivo
 
     if not entrada.exists():
         raise FileNotFoundError(f"No se encontró el archivo: {entrada}")
